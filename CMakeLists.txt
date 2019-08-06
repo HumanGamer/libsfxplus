@@ -9,13 +9,25 @@ set(CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules"
 )
 
+option(SHARED_LIBRARY "Build shared library" OFF)
+
 find_package(OpenAL REQUIRED)
 include_directories(${OPENAL_INCLUDE_DIR})
 
 find_package(LibSndFile REQUIRED)
 include_directories(${LIBSNDFILE_INCLUDE_DIRS})
 
-include_directories(include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR} include)
+
+if (SHARED_LIBRARY)
+    set(SFXPLUS_SHARED ON)
+    set(LIBRARY_TYPE SHARED)
+    add_definitions(-DSFXPLUS_SHARED_EXPORT)
+else()
+    set(LIBRARY_TYPE STATIC)
+endif()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/sfxplus_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/sfxplus_config.h @ONLY)
 
 set (Main_SRC
     # Sources
@@ -25,5 +37,17 @@ set (Main_SRC
     include/sfxplus.h
 )
 
-add_library(libsfxplus STATIC ${Main_SRC})
+add_library(libsfxplus ${LIBRARY_TYPE} ${Main_SRC})
 target_link_libraries(libsfxplus ${OPENAL_LIBRARY} ${LIBSNDFILE_LIBRARIES})
+
+set(BIN_DESTINATION "bin")
+set(LIB_DESTINATION "lib")
+
+install(TARGETS libsfxplus
+        RUNTIME DESTINATION ${BIN_DESTINATION}
+        LIBRARY DESTINATION ${LIB_DESTINATION}
+        ARCHIVE DESTINATION ${LIB_DESTINATION}
+)
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION include)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sfxplus_config.h DESTINATION include)
