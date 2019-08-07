@@ -31,14 +31,31 @@ endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/sfxplus_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/sfxplus_config.h @ONLY)
 
 set (Main_SRC
-    # Sources
-    src/sfxplus.cpp
-    
-    # Headers
+    src/init.cpp
+    src/source.cpp
+    src/audio.cpp
+    src/error.cpp
+)
+
+set (Main_PRIVATE_HDR
+    src/core.h
+)
+
+set (Main_PUBLIC_HDR
     include/sfxplus.h
 )
 
-add_library(libsfxplus ${LIBRARY_TYPE} ${Main_SRC})
+source_group("Library\\Sources" FILES ${Main_SRC})
+source_group("Library\\Headers" FILES ${Main_PRIVATE_HDR})
+source_group("Public Headers" FILES ${Main_PUBLIC_HDR})
+
+set (Main_ALLSRC
+    ${Main_SRC}
+    ${Main_PRIVATE_HDR}
+    ${Main_PUBLIC_HDR}
+)
+
+add_library(libsfxplus ${LIBRARY_TYPE} ${Main_ALLSRC})
 target_link_libraries(libsfxplus ${OPENAL_LIBRARY} ${LIBSNDFILE_LIBRARIES})
 
 set_target_properties(libsfxplus PROPERTIES PREFIX "")
