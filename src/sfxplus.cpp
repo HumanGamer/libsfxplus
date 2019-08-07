@@ -9,17 +9,13 @@ bool sfx_initialized = false;
 ALCdevice* alc_device = nullptr;
 ALCcontext* alc_context = nullptr;
 
-#define INTERNAL_LAST_ERROR_DEFAULT AL_NO_ERROR
-
 int sfx_last_error = SFX_NO_ERROR;
-int sfx_internal_last_error = INTERNAL_LAST_ERROR_DEFAULT;
 
-void sfx_setlasterror_internal();
+void sfx_setlasterror_internal(int error);
 
 bool SFXPLUSCALL sfx_startup()
 {
     sfx_last_error = SFX_NO_ERROR;
-    sfx_internal_last_error = INTERNAL_LAST_ERROR_DEFAULT;
 
     if (sfx_initialized)
         return true;
@@ -31,14 +27,15 @@ bool SFXPLUSCALL sfx_startup()
         return false;
     }
 
+    alGetError();
+
     ALCenum error;
-    error = alGetError();
+    error = alcGetError(alc_device);
     if (error != AL_NO_ERROR)
     {
         sfx_last_error = SFX_INTERNAL_ERROR;
-        sfx_internal_last_error = error;
 
-        sfx_setlasterror_internal();
+        sfx_setlasterror_internal(error);
         return false;
     }
 
@@ -49,13 +46,12 @@ bool SFXPLUSCALL sfx_startup()
         return false;
     }
 
-    error = alGetError();
+    error = alcGetError(alc_device);
     if (error != AL_NO_ERROR)
     {
         sfx_last_error = SFX_INTERNAL_ERROR;
-        sfx_internal_last_error = error;
 
-        sfx_setlasterror_internal();
+        sfx_setlasterror_internal(error);
         return false;
     }
 
@@ -66,7 +62,6 @@ bool SFXPLUSCALL sfx_startup()
 void SFXPLUSCALL sfx_shutdown()
 {
     sfx_last_error = SFX_NO_ERROR;
-    sfx_internal_last_error = INTERNAL_LAST_ERROR_DEFAULT;
 
     alc_device = alcGetContextsDevice(alc_context);
     alcMakeContextCurrent(NULL);
@@ -110,10 +105,13 @@ const char* SFXPLUSCALL sfx_errorstring(int error)
     }
 }
 
-void sfx_setlasterror_internal()
+void sfx_setlasterror_internal(int error)
 {
-    switch (sfx_internal_last_error)
+    switch (error)
     {
+    case ALC_NO_ERROR:
+        sfx_last_error = SFX_NO_ERROR;
+        break;
     case ALC_INVALID_DEVICE:
         sfx_last_error = SFX_INVALID_DEVICE;
         break;
