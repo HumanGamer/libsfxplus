@@ -8,12 +8,16 @@ int main(int argc, const char** argv)
 
     if (!sfx_startup())
     {
-        std::cerr << "Failed to initialize libsfxplus" << std::endl;
+        int error = sfx_getlasterror();
+        const char* errstr = sfx_errorstring(error);
+        std::cerr << "Failed to initialize libsfxplus: " << errstr << std::endl;
         sfx_shutdown();
         return 1;
     }
 
-    std::cout << "Success." << std::endl;
+    int error = sfx_getlasterror();
+    const char* errstr = sfx_errorstring(error);
+    std::cout << "Success: " << errstr << std::endl;
 
     sfx_shutdown();
 

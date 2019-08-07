@@ -44,6 +44,15 @@ extern "C"
 {
 #endif
 
+enum SFX_ERROR
+{
+    SFX_NO_ERROR,
+    SFX_INTERNAL_ERROR,
+    SFX_FAIL_OPEN_DEVICE,
+    SFX_FAIL_CREATE_CONTEXT,
+    SFX_UNKNOWN_ERROR = 0x10000
+};
+
 /*
  * Initializes SFX+ Library
  * This must be the first thing called before any other functions in this library.
@@ -55,6 +64,13 @@ SFXPLUSEXP bool SFXPLUSCALL sfx_startup();
  * This should be called when closing the program
  */
 SFXPLUSEXP void SFXPLUSCALL sfx_shutdown();
+
+/*
+ * Gets the last error or SFX_NO_ERROR if there was no error.
+ */
+SFXPLUSEXP int SFXPLUSCALL sfx_getlasterror();
+
+SFXPLUSEXP const char* SFXPLUSCALL sfx_errorstring(int error);
 
 #ifdef __cplusplus
 }
