@@ -45,6 +45,7 @@ extern "C"
 #endif
 
 typedef unsigned int SFX_SOURCE;
+typedef unsigned int SFX_AUDIO;
 
 enum SFX_ERROR
 {
@@ -55,12 +56,21 @@ enum SFX_ERROR
     SFX_FAIL_CREATE_SOURCE,
     SFX_FAIL_CREATE_BUFFER,
     SFX_FAIL_READ_FILE,
+    SFX_INVALID_STATE,
     SFX_INVALID_DEVICE,
     SFX_INVALID_CONTEXT,
     SFX_INVALID_ENUM,
     SFX_INVALID_VALUE,
     SFX_OUT_OF_MEMORY,
     SFX_UNKNOWN_ERROR = 0x10000
+};
+
+enum SFX_SOURCE_STATE
+{
+    SFX_SOURCE_STATE_INITIAL,
+    SFX_SOURCE_STATE_PLAYING,
+    SFX_SOURCE_STATE_PAUSED,
+    SFX_SOURCE_STATE_STOPPED
 };
 
 /*
@@ -91,9 +101,24 @@ SFXPLUSEXP const char* SFXPLUSCALL sfx_errorstring(int error = -1);
 SFXPLUSEXP SFX_SOURCE SFXPLUSCALL sfx_create_source(float pitch = 1.0f, float gain = 1.0f, bool looping = false);
 
 /*
+ * Load audio from file
+ */
+SFXPLUSEXP SFX_AUDIO SFXPLUSCALL sfx_load_audio(const char* path);
+
+/*
  * Plays a sound using the specified source
  */
-SFXPLUSEXP void SFXPLUSCALL sfx_source_play_sound(SFX_SOURCE source, const char* path);
+SFXPLUSEXP void SFXPLUSCALL sfx_source_play_sound(SFX_SOURCE source, SFX_AUDIO audio);
+
+/*
+ * Check if the source is playing
+ */
+SFXPLUSEXP int SFXPLUSCALL sfx_source_getstate(SFX_SOURCE source);
+
+/*
+ * Wait for sound to play before continuing
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_source_wait(SFX_SOURCE source);
 
 #ifdef __cplusplus
 }

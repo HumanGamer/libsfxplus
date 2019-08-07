@@ -31,14 +31,23 @@ int main(int argc, const char** argv)
     }
 
     const char* inputFile = argv[1];
-
-    sfx_source_play_sound(source, inputFile);
+    SFX_AUDIO audio = sfx_load_audio(inputFile);
     if (sfx_getlasterror() != SFX_NO_ERROR)
     {
         std::cerr << "Error when playing sound with source: " << sfx_errorstring() << std::endl;
         sfx_shutdown();
         return 1;
     }
+
+    sfx_source_play_sound(source, audio);
+    if (sfx_getlasterror() != SFX_NO_ERROR)
+    {
+        std::cerr << "Error when playing sound with source: " << sfx_errorstring() << std::endl;
+        sfx_shutdown();
+        return 1;
+    }
+
+    sfx_source_wait(source);
 
     sfx_shutdown();
 
