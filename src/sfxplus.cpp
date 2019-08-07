@@ -4,6 +4,7 @@
 #include <al.h>
 #include <alc.h>
 #include <vector>
+#include <cstring>
 
 bool sfx_initialized = false;
 
