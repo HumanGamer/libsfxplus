@@ -1,6 +1,7 @@
 #include "core.h"
 
 #include <vector>
+#include <cstring>
 #include <sndfile.h>
 #include <al.h>
 
