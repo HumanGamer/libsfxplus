@@ -9,11 +9,17 @@ bool sfx_initialized = false;
 ALCdevice* alc_device = nullptr;
 ALCcontext* alc_context = nullptr;
 
+#define INTERNAL_LAST_ERROR_DEFAULT AL_NO_ERROR
+
 int sfx_last_error = SFX_NO_ERROR;
+int sfx_internal_last_error = INTERNAL_LAST_ERROR_DEFAULT;
+
+void sfx_setlasterror_internal();
 
 bool SFXPLUSCALL sfx_startup()
 {
     sfx_last_error = SFX_NO_ERROR;
+    sfx_internal_last_error = INTERNAL_LAST_ERROR_DEFAULT;
 
     if (sfx_initialized)
         return true;
@@ -30,6 +36,9 @@ bool SFXPLUSCALL sfx_startup()
     if (error != AL_NO_ERROR)
     {
         sfx_last_error = SFX_INTERNAL_ERROR;
+        sfx_internal_last_error = error;
+
+        sfx_setlasterror_internal();
         return false;
     }
 
@@ -44,15 +53,21 @@ bool SFXPLUSCALL sfx_startup()
     if (error != AL_NO_ERROR)
     {
         sfx_last_error = SFX_INTERNAL_ERROR;
+        sfx_internal_last_error = error;
+
+        sfx_setlasterror_internal();
         return false;
     }
-    
+
     sfx_initialized = true;
     return true;
 }
 
 void SFXPLUSCALL sfx_shutdown()
 {
+    sfx_last_error = SFX_NO_ERROR;
+    sfx_internal_last_error = INTERNAL_LAST_ERROR_DEFAULT;
+
     alc_device = alcGetContextsDevice(alc_context);
     alcMakeContextCurrent(NULL);
     alcDestroyContext(alc_context);
@@ -66,26 +81,8 @@ int SFXPLUSCALL sfx_getlasterror()
 
 const char* SFXPLUSCALL sfx_errorstring(int error)
 {
-    /*const char* err;
-    switch (error)
-    {
-        case SFX_NO_ERROR:
-            err = "SFX_NO_ERROR";
-            break;
-        case SFX_INTERNAL_ERROR:
-            err = "SFX_INTERNAL_ERROR";
-            break;
-        case SFX_FAIL_OPEN_DEVICE:
-            err = "SFX_FAIL_OPEN_DEVICE";
-            break;
-        case SFX_FAIL_CREATE_CONTEXT:
-            err = "SFX_FAIL_CREATE_CONTEXT";
-            break;
-        case SFX_UNKNOWN_ERROR:
-        default:
-            err = "SFX_UNKNOWN_ERROR";
-            break;
-    }*/
+    if (error == -1)
+        error = sfx_last_error;
 
     switch (error)
     {
@@ -97,8 +94,40 @@ const char* SFXPLUSCALL sfx_errorstring(int error)
         return "SFX_FAIL_OPEN_DEVICE";
     case SFX_FAIL_CREATE_CONTEXT:
         return "SFX_FAIL_CREATE_CONTEXT";
+    case SFX_INVALID_DEVICE:
+        return "SFX_INVALID_DEVICE";
+    case SFX_INVALID_CONTEXT:
+        return "SFX_INVALID_CONTEXT";
+    case SFX_INVALID_ENUM:
+        return "SFX_INVALID_ENUM";
+    case SFX_INVALID_VALUE:
+        return "SFX_INVALID_VALUE";
+    case SFX_OUT_OF_MEMORY:
+        return "SFX_OUT_OF_MEMORY";
     case SFX_UNKNOWN_ERROR:
     default:
         return "SFX_UNKNOWN_ERROR";
+    }
+}
+
+void sfx_setlasterror_internal()
+{
+    switch (sfx_internal_last_error)
+    {
+    case ALC_INVALID_DEVICE:
+        sfx_last_error = SFX_INVALID_DEVICE;
+        break;
+    case ALC_INVALID_CONTEXT:
+        sfx_last_error = SFX_INVALID_CONTEXT;
+        break;
+    case ALC_INVALID_ENUM:
+        sfx_last_error = SFX_INVALID_ENUM;
+        break;
+    case ALC_INVALID_VALUE:
+        sfx_last_error = SFX_INVALID_VALUE;
+        break;
+    case ALC_OUT_OF_MEMORY:
+        sfx_last_error = SFX_OUT_OF_MEMORY;
+        break;
     }
 }

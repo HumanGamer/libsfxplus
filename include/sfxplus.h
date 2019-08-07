@@ -50,6 +50,11 @@ enum SFX_ERROR
     SFX_INTERNAL_ERROR,
     SFX_FAIL_OPEN_DEVICE,
     SFX_FAIL_CREATE_CONTEXT,
+    SFX_INVALID_DEVICE,
+    SFX_INVALID_CONTEXT,
+    SFX_INVALID_ENUM,
+    SFX_INVALID_VALUE,
+    SFX_OUT_OF_MEMORY,
     SFX_UNKNOWN_ERROR = 0x10000
 };
 
@@ -70,7 +75,10 @@ SFXPLUSEXP void SFXPLUSCALL sfx_shutdown();
  */
 SFXPLUSEXP int SFXPLUSCALL sfx_getlasterror();
 
-SFXPLUSEXP const char* SFXPLUSCALL sfx_errorstring(int error);
+/*
+ * Gets the specified error (or the last error) as a string.
+ */
+SFXPLUSEXP const char* SFXPLUSCALL sfx_errorstring(int error = -1);
 
 #ifdef __cplusplus
 }
