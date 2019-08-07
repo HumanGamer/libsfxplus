@@ -6,7 +6,7 @@ int main(int argc, const char** argv)
 {
     std::cout << "=== Example1 ===" << std::endl;
 
-    if (!sfx_init())
+    if (!sfx_startup())
     {
         std::cerr << "Failed to initialize libsfxplus" << std::endl;
         return 1;
@@ -14,11 +14,7 @@ int main(int argc, const char** argv)
 
     std::cout << "Success." << std::endl;
 
-    if (!sfx_unload())
-    {
-        std::cerr << "Failed to unload libsfxplus" << std::endl;
-        return 2;
-    }
+    sfx_shutdown();
 
     return 0;
 }

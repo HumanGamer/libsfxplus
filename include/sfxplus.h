@@ -48,13 +48,13 @@ extern "C"
  * Initializes SFX+ Library
  * This must be the first thing called before any other functions in this library.
  */
-SFXPLUSEXP bool SFXPLUSCALL sfx_init();
+SFXPLUSEXP bool SFXPLUSCALL sfx_startup();
 
 /*
  * Unloads the SFX+ Library
  * This should be called when closing the program
  */
-SFXPLUSEXP bool SFXPLUSCALL sfx_unload();
+SFXPLUSEXP void SFXPLUSCALL sfx_shutdown();
 
 #ifdef __cplusplus
 }

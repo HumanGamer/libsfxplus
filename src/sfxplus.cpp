@@ -9,7 +9,7 @@ bool sfx_initialized = false;
 ALCdevice* alc_device = nullptr;
 ALCcontext* alc_context = nullptr;
 
-bool SFXPLUSCALL sfx_init()
+bool SFXPLUSCALL sfx_startup()
 {
     if (sfx_initialized)
         return true;
@@ -35,26 +35,10 @@ bool SFXPLUSCALL sfx_init()
     return true;
 }
 
-bool SFXPLUSCALL sfx_unload()
+void SFXPLUSCALL sfx_shutdown()
 {
-    if (alc_context != nullptr)
-        alcDestroyContext(alc_context);
-
-    ALCenum error;
-    error = alGetError();
-    if (error != AL_NO_ERROR)
-        return false;
-
-    if (alc_device != nullptr)
-    {
-        if (!alcCloseDevice(alc_device))
-            return false;
-
-        ALCenum error;
-        error = alGetError();
-        if (error != AL_NO_ERROR)
-            return false;
-    }
-
-    return true;
+    alc_device = alcGetContextsDevice(alc_context);
+    alcMakeContextCurrent(NULL);
+    alcDestroyContext(alc_context);
+    alcCloseDevice(alc_device);
 }
