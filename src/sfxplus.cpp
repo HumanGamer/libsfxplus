@@ -3,6 +3,8 @@
 #include <sndfile.h>
 #include <al.h>
 #include <alc.h>
+#include <xmemory>
+#include <vector>
 
 bool sfx_initialized = false;
 
@@ -11,6 +13,7 @@ ALCcontext* alc_context = nullptr;
 
 int sfx_last_error = SFX_NO_ERROR;
 
+bool sfx_checkerror_internal();
 void sfx_setlasterror_internal(int error);
 
 bool SFXPLUSCALL sfx_startup()
@@ -31,7 +34,7 @@ bool SFXPLUSCALL sfx_startup()
 
     ALCenum error;
     error = alcGetError(alc_device);
-    if (error != AL_NO_ERROR)
+    if (error != ALC_NO_ERROR)
     {
         sfx_last_error = SFX_INTERNAL_ERROR;
 
@@ -47,7 +50,7 @@ bool SFXPLUSCALL sfx_startup()
     }
 
     error = alcGetError(alc_device);
-    if (error != AL_NO_ERROR)
+    if (error != ALC_NO_ERROR)
     {
         sfx_last_error = SFX_INTERNAL_ERROR;
 
@@ -57,6 +60,114 @@ bool SFXPLUSCALL sfx_startup()
 
     sfx_initialized = true;
     return true;
+}
+
+SFX_SOURCE SFXPLUSCALL sfx_create_source(float pitch, float gain, bool looping)
+{
+    ALuint source;
+    alGenSources((ALuint)1, &source);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_CREATE_SOURCE;
+        return 0;
+    }
+
+    alSourcef(source, AL_PITCH, pitch);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_CREATE_SOURCE;
+        return 0;
+    }
+
+    alSourcef(source, AL_GAIN, gain);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_CREATE_SOURCE;
+        return 0;
+    }
+
+    alSourcei(source, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_CREATE_SOURCE;
+        return 0;
+    }
+
+    return source;
+}
+
+void SFXPLUSCALL sfx_source_play_sound(SFX_SOURCE source, const char* path)
+{
+    ALuint buffer;
+    alGenBuffers((ALuint)1, &buffer);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_CREATE_BUFFER;
+        return;
+    }
+
+    SF_INFO sfinfo;
+    memset(&sfinfo, 0, sizeof(sfinfo));
+
+    SNDFILE* snd = sf_open(path, SFM_READ, &sfinfo);
+    if (snd == nullptr)
+    {
+        sfx_last_error = SFX_FAIL_READ_FILE;
+        return;
+    }
+
+    std::vector<unsigned short> data;
+
+    short read_buf[4096];
+
+    size_t read_size = 0;
+    while ((read_size = sf_read_short(snd, read_buf, 4096)) != 0)
+    {
+        data.insert(data.end(), read_buf, read_buf + read_size);
+    }
+
+    alBufferData(buffer, sfinfo.channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
+                 &data.front(), data.size() * sizeof(unsigned short), sfinfo.samplerate);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_CREATE_BUFFER;
+        return;
+    }
+
+    alSourcei(source, AL_BUFFER, buffer);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_CREATE_BUFFER;
+        return;
+    }
+
+    alSourcePlay(source);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_CREATE_BUFFER;
+        return;
+    }
+
+    // ----------------------------------------------------
+    // TODO: Make this part of api
+
+    int source_state;
+    alGetSourcei(source, AL_SOURCE_STATE, &source_state);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_CREATE_BUFFER;
+        return;
+    }
+
+    while (source_state == AL_PLAYING)
+    {
+        alGetSourcei(source, AL_SOURCE_STATE, &source_state);
+        if (!sfx_checkerror_internal())
+        {
+            sfx_last_error = SFX_FAIL_CREATE_BUFFER;
+            return;
+        }
+    }
 }
 
 void SFXPLUSCALL sfx_shutdown()
@@ -93,6 +204,12 @@ const char* SFXPLUSCALL sfx_errorstring(int error)
         return "SFX_INVALID_DEVICE";
     case SFX_INVALID_CONTEXT:
         return "SFX_INVALID_CONTEXT";
+    case SFX_FAIL_CREATE_SOURCE:
+        return "SFX_FAIL_CREATE_SOURCE";
+    case SFX_FAIL_CREATE_BUFFER:
+        return "SFX_FAIL_CREATE_BUFFER";
+    case SFX_FAIL_READ_FILE:
+        return "SFX_FAIL_READ_FILE";
     case SFX_INVALID_ENUM:
         return "SFX_INVALID_ENUM";
     case SFX_INVALID_VALUE:
@@ -103,6 +220,20 @@ const char* SFXPLUSCALL sfx_errorstring(int error)
     default:
         return "SFX_UNKNOWN_ERROR";
     }
+}
+
+bool sfx_checkerror_internal()
+{
+    ALenum error = alGetError();
+    if (error != AL_NO_ERROR)
+    {
+        sfx_last_error = SFX_INTERNAL_ERROR;
+
+        sfx_setlasterror_internal(error);
+        return false;
+    }
+
+    return true;
 }
 
 void sfx_setlasterror_internal(int error)

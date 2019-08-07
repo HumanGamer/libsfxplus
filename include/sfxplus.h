@@ -44,12 +44,17 @@ extern "C"
 {
 #endif
 
+typedef unsigned int SFX_SOURCE;
+
 enum SFX_ERROR
 {
     SFX_NO_ERROR,
     SFX_INTERNAL_ERROR,
     SFX_FAIL_OPEN_DEVICE,
     SFX_FAIL_CREATE_CONTEXT,
+    SFX_FAIL_CREATE_SOURCE,
+    SFX_FAIL_CREATE_BUFFER,
+    SFX_FAIL_READ_FILE,
     SFX_INVALID_DEVICE,
     SFX_INVALID_CONTEXT,
     SFX_INVALID_ENUM,
@@ -79,6 +84,16 @@ SFXPLUSEXP int SFXPLUSCALL sfx_getlasterror();
  * Gets the specified error (or the last error) as a string.
  */
 SFXPLUSEXP const char* SFXPLUSCALL sfx_errorstring(int error = -1);
+
+/*
+ * Create an audio source with the specified parameters
+ */
+SFXPLUSEXP SFX_SOURCE SFXPLUSCALL sfx_create_source(float pitch = 1.0f, float gain = 1.0f, bool looping = false);
+
+/*
+ * Plays a sound using the specified source
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_source_play_sound(SFX_SOURCE source, const char* path);
 
 #ifdef __cplusplus
 }
