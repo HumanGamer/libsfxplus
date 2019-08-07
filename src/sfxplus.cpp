@@ -3,7 +3,6 @@
 #include <sndfile.h>
 #include <al.h>
 #include <alc.h>
-#include <xmemory>
 #include <vector>
 
 bool sfx_initialized = false;
