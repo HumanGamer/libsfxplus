@@ -90,17 +90,22 @@ SFXPLUSEXP void SFXPLUSCALL sfx_shutdown();
 /*
  * Gets the last error or SFX_NO_ERROR if there was no error.
  */
-SFXPLUSEXP int SFXPLUSCALL sfx_getlasterror();
+SFXPLUSEXP int SFXPLUSCALL sfx_error();
 
 /*
  * Gets the specified error (or the last error) as a string.
  */
-SFXPLUSEXP const char* SFXPLUSCALL sfx_errorstring(int error = -1);
+SFXPLUSEXP const char* SFXPLUSCALL sfx_error_string(int error = -1);
 
 /*
  * Creates an audio source with the specified parameters
  */
-SFXPLUSEXP SFX_SOURCE SFXPLUSCALL sfx_create_source(float pitch = 1.0f, float gain = 1.0f, bool looping = false);
+SFXPLUSEXP SFX_SOURCE SFXPLUSCALL sfx_source_create(float pitch = 1.0f, float gain = 1.0f, bool looping = false);
+
+/*
+ * Destroys an audio source
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_source_destroy(SFX_SOURCE source);
 
 /*
  * Sets the pitch of the audio source
@@ -110,17 +115,12 @@ SFXPLUSEXP void SFXPLUSCALL sfx_source_pitch(SFX_SOURCE source, float pitch);
 /*
  * Sets the gain of the audio source
  */
-void SFXPLUSCALL sfx_source_gain(SFX_SOURCE source, float gain);
+SFXPLUSEXP void SFXPLUSCALL sfx_source_gain(SFX_SOURCE source, float gain);
 
 /*
  * Set whether or not the audio source should loop
  */
-void SFXPLUSCALL sfx_source_looping(SFX_SOURCE source, bool looping);
-
-/*
- * Loads audio from file
- */
-SFXPLUSEXP SFX_AUDIO SFXPLUSCALL sfx_load_audio(const char* path);
+SFXPLUSEXP void SFXPLUSCALL sfx_source_looping(SFX_SOURCE source, bool looping);
 
 /*
  * Plays a sound using the specified source
@@ -136,6 +136,16 @@ SFXPLUSEXP int SFXPLUSCALL sfx_source_getstate(SFX_SOURCE source);
  * Waits for the sound to finish playing before continuing
  */
 SFXPLUSEXP void SFXPLUSCALL sfx_source_wait(SFX_SOURCE source);
+
+/*
+ * Loads audio from file
+ */
+SFXPLUSEXP SFX_AUDIO SFXPLUSCALL sfx_audio_load(const char* path);
+
+/*
+ * Destroys audio handle
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_audio_destroy(SFX_AUDIO audio);
 
 #ifdef __cplusplus
 }

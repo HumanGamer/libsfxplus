@@ -2,6 +2,14 @@
 
 #include <sfxplus.h>
 
+#define ERROR_CHECK(msg) \
+    if (sfx_error() != SFX_NO_ERROR) \
+    { \
+        std::cerr << msg << ": " << sfx_error_string() << std::endl; \
+        sfx_shutdown(); \
+        return 1; \
+    }
+
 int main(int argc, const char** argv)
 {
     std::cout << "=== Example1 ===" << std::endl;
@@ -9,19 +17,14 @@ int main(int argc, const char** argv)
     std::cout << "Initializing..." << std::endl;
     if (!sfx_startup())
     {
-        std::cerr << "Failed to initialize libsfxplus: " << sfx_errorstring() << std::endl;
+        std::cerr << "Failed to initialize libsfxplus: " << sfx_error_string() << std::endl;
         sfx_shutdown();
         return 1;
     }
 
     std::cout << "Creating source..." << std::endl;
-    SFX_SOURCE source = sfx_create_source();
-    if (sfx_getlasterror() != SFX_NO_ERROR)
-    {
-        std::cerr << "Error when creating source: " << sfx_errorstring() << std::endl;
-        sfx_shutdown();
-        return 1;
-    }
+    SFX_SOURCE source = sfx_source_create();
+    ERROR_CHECK("Error when creating source");
 
     if (argc < 2)
     {
@@ -33,40 +36,28 @@ int main(int argc, const char** argv)
 
     const char* inputFile = argv[1];
     std::cout << "Loading Audio File..." << std::endl;
-    SFX_AUDIO audio = sfx_load_audio(inputFile);
-    if (sfx_getlasterror() != SFX_NO_ERROR)
-    {
-        std::cerr << "Error when playing sound with source: " << sfx_errorstring() << std::endl;
-        sfx_shutdown();
-        return 1;
-    }
+    SFX_AUDIO audio = sfx_audio_load(inputFile);
+    ERROR_CHECK("Error when loading sound");
 
     std::cout << "Playing Audio File..." << std::endl;
     sfx_source_play_sound(source, audio);
-    if (sfx_getlasterror() != SFX_NO_ERROR)
-    {
-        std::cerr << "Error when playing sound with source: " << sfx_errorstring() << std::endl;
-        sfx_shutdown();
-        return 1;
-    }
+    ERROR_CHECK("Error when playing sound with source");
 
     std::cout << "Waiting for playback to finish..." << std::endl;
     sfx_source_wait(source);
-    if (sfx_getlasterror() != SFX_NO_ERROR)
-    {
-        std::cerr << "Error when playing sound with source: " << sfx_errorstring() << std::endl;
-        sfx_shutdown();
-        return 1;
-    }
+    ERROR_CHECK("Error when waiting for playback to finish");
+
+    std::cout << "Unloading audio" << std::endl;
+    sfx_audio_destroy(audio);
+    ERROR_CHECK("Error when unloading audio");
+
+    std::cout << "Unloading source" << std::endl;
+    sfx_source_destroy(source);
+    ERROR_CHECK("Error when unloading source");
 
     std::cout << "Cleaning up..." << std::endl;
     sfx_shutdown();
-    if (sfx_getlasterror() != SFX_NO_ERROR)
-    {
-        std::cerr << "Error when playing sound with source: " << sfx_errorstring() << std::endl;
-        sfx_shutdown();
-        return 1;
-    }
+    ERROR_CHECK("Error when cleaning up");
 
     return 0;
 }

@@ -2,7 +2,7 @@
 
 #include <al.h>
 
-SFX_SOURCE SFXPLUSCALL sfx_create_source(float pitch, float gain, bool looping)
+SFX_SOURCE SFXPLUSCALL sfx_source_create(float pitch, float gain, bool looping)
 {
     ALuint source;
     alGenSources((ALuint)1, &source);
@@ -34,6 +34,11 @@ SFX_SOURCE SFXPLUSCALL sfx_create_source(float pitch, float gain, bool looping)
     }
 
     return source;
+}
+
+void SFXPLUSCALL sfx_source_destroy(SFX_SOURCE source)
+{
+    alDeleteSources(1, &source);
 }
 
 void SFXPLUSCALL sfx_source_pitch(SFX_SOURCE source, float pitch)

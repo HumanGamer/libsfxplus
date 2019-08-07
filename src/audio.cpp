@@ -5,7 +5,7 @@
 #include <sndfile.h>
 #include <al.h>
 
-SFX_AUDIO SFXPLUSCALL sfx_load_audio(const char* path)
+SFX_AUDIO SFXPLUSCALL sfx_audio_load(const char* path)
 {
     ALuint buffer;
     alGenBuffers((ALuint)1, &buffer);
@@ -44,4 +44,9 @@ SFX_AUDIO SFXPLUSCALL sfx_load_audio(const char* path)
     }
 
     return buffer;
+}
+
+void SFXPLUSCALL sfx_audio_destroy(SFX_AUDIO audio)
+{
+    alDeleteBuffers(1, &audio);
 }

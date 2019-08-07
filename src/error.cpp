@@ -3,12 +3,12 @@
 #include <al.h>
 #include <alc.h>
 
-int SFXPLUSCALL sfx_getlasterror()
+int SFXPLUSCALL sfx_error()
 {
     return sfx_last_error;
 }
 
-const char* SFXPLUSCALL sfx_errorstring(int error)
+const char* SFXPLUSCALL sfx_error_string(int error)
 {
     if (error == -1)
         error = sfx_last_error;
