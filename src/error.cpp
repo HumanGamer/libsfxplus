@@ -33,6 +33,8 @@ const char* SFXPLUSCALL sfx_errorstring(int error)
         return "SFX_FAIL_READ_FILE";
     case SFX_FAIL_SET_PROPERTY:
         return "SFX_FAIL_SET_PROPERTY";
+    case SFX_FAIL_GET_STATE:
+        return "SFX_FAIL_GET_STATE";
     case SFX_INVALID_STATE:
         return "SFX_INVALID_STATE";
     case SFX_INVALID_DEVICE:

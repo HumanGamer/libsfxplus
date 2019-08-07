@@ -89,7 +89,7 @@ int SFXPLUSCALL sfx_source_getstate(SFX_SOURCE source)
     alGetSourcei(source, AL_SOURCE_STATE, &source_state);
     if (!sfx_checkerror_internal())
     {
-        sfx_last_error = SFX_FAIL_CREATE_BUFFER;
+        sfx_last_error = SFX_FAIL_GET_STATE;
         return -1;
     }
 
