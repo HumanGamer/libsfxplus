@@ -50,6 +50,12 @@ extern "C"
  */
 SFXPLUSEXP bool SFXPLUSCALL sfx_init();
 
+/*
+ * Unloads the SFX+ Library
+ * This should be called when closing the program
+ */
+SFXPLUSEXP bool SFXPLUSCALL sfx_unload();
+
 #ifdef __cplusplus
 }
 #endif

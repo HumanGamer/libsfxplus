@@ -34,3 +34,27 @@ bool SFXPLUSCALL sfx_init()
     sfx_initialized = true;
     return true;
 }
+
+bool SFXPLUSCALL sfx_unload()
+{
+    if (alc_context != nullptr)
+        alcDestroyContext(alc_context);
+
+    ALCenum error;
+    error = alGetError();
+    if (error != AL_NO_ERROR)
+        return false;
+
+    if (alc_device != nullptr)
+    {
+        if (!alcCloseDevice(alc_device))
+            return false;
+
+        ALCenum error;
+        error = alGetError();
+        if (error != AL_NO_ERROR)
+            return false;
+    }
+
+    return true;
+}

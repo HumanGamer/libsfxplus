@@ -14,5 +14,11 @@ int main(int argc, const char** argv)
 
     std::cout << "Success." << std::endl;
 
+    if (!sfx_unload())
+    {
+        std::cerr << "Failed to unload libsfxplus" << std::endl;
+        return 2;
+    }
+
     return 0;
 }
