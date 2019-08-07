@@ -10,6 +10,7 @@ set(CMAKE_MODULE_PATH
 )
 
 option(SHARED_LIBRARY "Build shared library" OFF)
+option(BUILD_EXAMPLES "Build examples" ON)
 
 find_package(OpenAL REQUIRED)
 include_directories(${OPENAL_INCLUDE_DIR})
@@ -42,6 +43,9 @@ target_link_libraries(libsfxplus ${OPENAL_LIBRARY} ${LIBSNDFILE_LIBRARIES})
 
 set_target_properties(libsfxplus PROPERTIES PREFIX "")
 
+set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 set(BIN_DESTINATION "bin")
 set(LIB_DESTINATION "lib")
 
@@ -53,3 +57,7 @@ install(TARGETS libsfxplus
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION include)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sfxplus_config.h DESTINATION include)
+
+if (BUILD_EXAMPLES)
+add_subdirectory(examples)
+endif()
