@@ -40,6 +40,8 @@ set (Main_SRC
 add_library(libsfxplus ${LIBRARY_TYPE} ${Main_SRC})
 target_link_libraries(libsfxplus ${OPENAL_LIBRARY} ${LIBSNDFILE_LIBRARIES})
 
+set_target_properties(libsfxplus PROPERTIES PREFIX "")
+
 set(BIN_DESTINATION "bin")
 set(LIB_DESTINATION "lib")
 
