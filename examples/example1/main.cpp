@@ -9,6 +9,7 @@ int main(int argc, const char** argv)
     if (!sfx_startup())
     {
         std::cerr << "Failed to initialize libsfxplus" << std::endl;
+        sfx_shutdown();
         return 1;
     }
 
