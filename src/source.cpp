@@ -36,6 +36,36 @@ SFX_SOURCE SFXPLUSCALL sfx_create_source(float pitch, float gain, bool looping)
     return source;
 }
 
+void SFXPLUSCALL sfx_source_pitch(SFX_SOURCE source, float pitch)
+{
+    alSourcef(source, AL_PITCH, pitch);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_SET_PROPERTY;
+        return;
+    }
+}
+
+void SFXPLUSCALL sfx_source_gain(SFX_SOURCE source, float gain)
+{
+    alSourcef(source, AL_GAIN, gain);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_SET_PROPERTY;
+        return;
+    }
+}
+
+void SFXPLUSCALL sfx_source_looping(SFX_SOURCE source, bool looping)
+{
+    alSourcei(source, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_SET_PROPERTY;
+        return;
+    }
+}
+
 void SFXPLUSCALL sfx_source_play_sound(SFX_SOURCE source, SFX_AUDIO audio)
 {
     alSourcei(source, AL_BUFFER, audio);

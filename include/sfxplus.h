@@ -56,6 +56,7 @@ enum SFX_ERROR
     SFX_FAIL_CREATE_SOURCE,
     SFX_FAIL_CREATE_BUFFER,
     SFX_FAIL_READ_FILE,
+    SFX_FAIL_SET_PROPERTY,
     SFX_INVALID_STATE,
     SFX_INVALID_DEVICE,
     SFX_INVALID_CONTEXT,
@@ -96,12 +97,27 @@ SFXPLUSEXP int SFXPLUSCALL sfx_getlasterror();
 SFXPLUSEXP const char* SFXPLUSCALL sfx_errorstring(int error = -1);
 
 /*
- * Create an audio source with the specified parameters
+ * Creates an audio source with the specified parameters
  */
 SFXPLUSEXP SFX_SOURCE SFXPLUSCALL sfx_create_source(float pitch = 1.0f, float gain = 1.0f, bool looping = false);
 
 /*
- * Load audio from file
+ * Sets the pitch of the audio source
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_source_pitch(SFX_SOURCE source, float pitch);
+
+/*
+ * Sets the gain of the audio source
+ */
+void SFXPLUSCALL sfx_source_gain(SFX_SOURCE source, float gain);
+
+/*
+ * Set whether or not the audio source should loop
+ */
+void SFXPLUSCALL sfx_source_looping(SFX_SOURCE source, bool looping);
+
+/*
+ * Loads audio from file
  */
 SFXPLUSEXP SFX_AUDIO SFXPLUSCALL sfx_load_audio(const char* path);
 
@@ -111,12 +127,12 @@ SFXPLUSEXP SFX_AUDIO SFXPLUSCALL sfx_load_audio(const char* path);
 SFXPLUSEXP void SFXPLUSCALL sfx_source_play_sound(SFX_SOURCE source, SFX_AUDIO audio);
 
 /*
- * Check if the source is playing
+ * Checks if the source is playing
  */
 SFXPLUSEXP int SFXPLUSCALL sfx_source_getstate(SFX_SOURCE source);
 
 /*
- * Wait for sound to play before continuing
+ * Waits for the sound to finish playing before continuing
  */
 SFXPLUSEXP void SFXPLUSCALL sfx_source_wait(SFX_SOURCE source);
 
