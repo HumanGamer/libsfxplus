@@ -167,11 +167,9 @@ void sfx_run_stream_openal_internal(SFX_SOURCE source, int bufCount, SF_INFO sfi
     }
 }
 
-void SFXPLUSCALL sfx_source_open_stream(SFX_SOURCE source, const char* path)
+void SFXPLUSCALL sfx_source_open_stream(SFX_SOURCE source, const char* path, int bufferCount)
 {
     sfx_last_error = SFX_NO_ERROR;
-
-    int bufCount = 6;
 
     SF_INFO sfinfo;
     memset(&sfinfo, 0, sizeof(sfinfo));
@@ -185,7 +183,7 @@ void SFXPLUSCALL sfx_source_open_stream(SFX_SOURCE source, const char* path)
 
     std::thread io_thread(sfx_run_stream_io_internal, snd);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    std::thread openal_thread(sfx_run_stream_openal_internal, source, bufCount, sfinfo);
+    std::thread openal_thread(sfx_run_stream_openal_internal, source, bufferCount, sfinfo);
 
     io_thread.join();
     openal_thread.join();

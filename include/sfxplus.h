@@ -135,7 +135,7 @@ SFXPLUSEXP void SFXPLUSCALL sfx_source_play_sound(SFX_SOURCE source, SFX_AUDIO a
 /*
  * Streams an audio file using the specified source
  */
-SFXPLUSEXP void SFXPLUSCALL sfx_source_open_stream(SFX_SOURCE source, const char* path);
+SFXPLUSEXP void SFXPLUSCALL sfx_source_open_stream(SFX_SOURCE source, const char* path, int bufferCount = 3);
 
 /*
  * Checks if the source is playing
