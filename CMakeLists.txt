@@ -57,7 +57,7 @@ set (Main_ALLSRC
 )
 
 add_library(libsfxplus ${LIBRARY_TYPE} ${Main_ALLSRC})
-target_link_libraries(libsfxplus ${OPENAL_LIBRARY} ${LIBSNDFILE_LIBRARIES})
+target_link_libraries(libsfxplus -lpthread ${OPENAL_LIBRARY} ${LIBSNDFILE_LIBRARIES})
 
 set_target_properties(libsfxplus PROPERTIES PREFIX "")
 
