@@ -98,7 +98,7 @@ void sfx_run_stream_openal_internal(SFX_SOURCE source, int bufCount, SF_INFO sfi
 
     unsigned int buf;
 
-    while (true)
+    while (sfx_stream_running)
     {
         int numProcessed;
         alGetSourcei(source, AL_BUFFERS_PROCESSED, &numProcessed);
