@@ -7,6 +7,7 @@
 #include <sndfile.h>
 #include <al.h>
 
+bool sfx_stream_running;
 std::mutex sfx_stream_io_mutex, sfx_stream_play_mutex;
 std::vector<unsigned short> sfx_stream_data;
 size_t current;
@@ -20,7 +21,7 @@ void sfx_add_data_internal(short* first, short* last)
     sfx_stream_play_mutex.unlock();
 }
 
-void sfx_buffer_data_internal(ALuint buf, ALenum format, ALsizei freq)
+bool sfx_buffer_data_internal(ALuint buf, ALenum format, ALsizei freq)
 {
     std::lock(sfx_stream_play_mutex, sfx_stream_io_mutex);
     unsigned short* buffer = (&sfx_stream_data.front() + current);
@@ -36,6 +37,11 @@ void sfx_buffer_data_internal(ALuint buf, ALenum format, ALsizei freq)
 
     sfx_stream_play_mutex.unlock();
     sfx_stream_io_mutex.unlock();
+
+    if (size == 0)
+        return false;
+
+    return true;
 }
 
 void sfx_run_stream_io_internal(SNDFILE* snd)
@@ -45,7 +51,7 @@ void sfx_run_stream_io_internal(SNDFILE* snd)
     short read_buf[4096];
 
     size_t read_size = 0;
-    while ((read_size = sf_read_short(snd, read_buf, 4096)) != 0)
+    while (sfx_stream_running && (read_size = sf_read_short(snd, read_buf, 4096)) != 0)
         sfx_add_data_internal(read_buf, read_buf + read_size);
 }
 
@@ -112,21 +118,22 @@ void sfx_run_stream_openal_internal(SFX_SOURCE source, int bufCount, SF_INFO sfi
             }
             numProcessed--;
 
-            sfx_buffer_data_internal(buf,
+            if (sfx_buffer_data_internal(buf,
                 sfinfo.channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-                sfinfo.samplerate);
-
-            if (!sfx_checkerror_internal())
+                sfinfo.samplerate))
             {
-                sfx_last_error = SFX_FAIL_FILL_BUFFER;
-                return;
-            }
+                if (!sfx_checkerror_internal())
+                {
+                    sfx_last_error = SFX_FAIL_FILL_BUFFER;
+                    return;
+                }
 
-            alSourceQueueBuffers(source, 1, &buf);
-            if (!sfx_checkerror_internal())
-            {
-                sfx_last_error = SFX_FAIL_QUEUE_BUFFER;
-                return;
+                alSourceQueueBuffers(source, 1, &buf);
+                if (!sfx_checkerror_internal())
+                {
+                    sfx_last_error = SFX_FAIL_QUEUE_BUFFER;
+                    return;
+                }
             }
         }
 
@@ -148,7 +155,10 @@ void sfx_run_stream_openal_internal(SFX_SOURCE source, int bufCount, SF_INFO sfi
                 return;
             }
             if (queued == 0)
+            {
+                sfx_stream_running = false;
                 return;
+            }
 
             alSourcePlay(source);
             if (!sfx_checkerror_internal())
@@ -170,6 +180,8 @@ void sfx_run_stream_openal_internal(SFX_SOURCE source, int bufCount, SF_INFO sfi
 void SFXPLUSCALL sfx_source_open_stream(SFX_SOURCE source, const char* path, int bufferCount)
 {
     sfx_last_error = SFX_NO_ERROR;
+
+    sfx_stream_running = true;
 
     SF_INFO sfinfo;
     memset(&sfinfo, 0, sizeof(sfinfo));
