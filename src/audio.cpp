@@ -7,6 +7,8 @@
 
 SFX_AUDIO SFXPLUSCALL sfx_audio_load(const char* path)
 {
+    sfx_last_error = SFX_NO_ERROR;
+
     ALuint buffer;
     alGenBuffers((ALuint)1, &buffer);
     if (!sfx_checkerror_internal())
@@ -39,7 +41,7 @@ SFX_AUDIO SFXPLUSCALL sfx_audio_load(const char* path)
         &data.front(), data.size() * sizeof(unsigned short), sfinfo.samplerate);
     if (!sfx_checkerror_internal())
     {
-        sfx_last_error = SFX_FAIL_CREATE_BUFFER;
+        sfx_last_error = SFX_FAIL_FILL_BUFFER;
         return 0;
     }
 

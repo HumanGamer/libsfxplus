@@ -34,6 +34,7 @@ set (Main_SRC
     src/init.cpp
     src/source.cpp
     src/audio.cpp
+    src/stream.cpp
     src/error.cpp
 )
 

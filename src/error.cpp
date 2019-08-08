@@ -29,10 +29,20 @@ const char* SFXPLUSCALL sfx_error_string(int error)
         return "SFX_FAIL_CREATE_SOURCE";
     case SFX_FAIL_CREATE_BUFFER:
         return "SFX_FAIL_CREATE_BUFFER";
+    case SFX_FAIL_PLAY_SOURCE:
+        return "SFX_FAIL_PLAY_SOURCE";
+    case SFX_FAIL_FILL_BUFFER:
+        return "SFX_FAIL_FILL_BUFFER";
+    case SFX_FAIL_UNQUEUE_BUFFER:
+        return "SFX_FAIL_UNQUEUE_BUFFER";
+    case SFX_FAIL_QUEUE_BUFFER:
+        return "SFX_FAIL_QUEUE_BUFFER";
     case SFX_FAIL_READ_FILE:
         return "SFX_FAIL_READ_FILE";
     case SFX_FAIL_SET_PROPERTY:
         return "SFX_FAIL_SET_PROPERTY";
+    case SFX_FAIL_GET_PROPERTY:
+        return "SFX_FAIL_GET_PROPERTY";
     case SFX_FAIL_GET_STATE:
         return "SFX_FAIL_GET_STATE";
     case SFX_INVALID_STATE:

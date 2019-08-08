@@ -55,8 +55,13 @@ enum SFX_ERROR
     SFX_FAIL_CREATE_CONTEXT,
     SFX_FAIL_CREATE_SOURCE,
     SFX_FAIL_CREATE_BUFFER,
+    SFX_FAIL_PLAY_SOURCE,
+    SFX_FAIL_FILL_BUFFER,
+    SFX_FAIL_UNQUEUE_BUFFER,
+    SFX_FAIL_QUEUE_BUFFER,
     SFX_FAIL_READ_FILE,
     SFX_FAIL_SET_PROPERTY,
+    SFX_FAIL_GET_PROPERTY,
     SFX_FAIL_GET_STATE,
     SFX_INVALID_STATE,
     SFX_INVALID_DEVICE,
@@ -126,6 +131,11 @@ SFXPLUSEXP void SFXPLUSCALL sfx_source_looping(SFX_SOURCE source, bool looping);
  * Plays a sound using the specified source
  */
 SFXPLUSEXP void SFXPLUSCALL sfx_source_play_sound(SFX_SOURCE source, SFX_AUDIO audio);
+
+/*
+ * Streams an audio file using the specified source
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_source_open_stream(SFX_SOURCE source, const char* path);
 
 /*
  * Checks if the source is playing

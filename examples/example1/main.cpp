@@ -34,8 +34,12 @@ int main(int argc, const char** argv)
         return 0;
     }
 
+    std::cout << "Streaming sound..." << std::endl;
     const char* inputFile = argv[1];
-    std::cout << "Loading Audio File..." << std::endl;
+    sfx_source_open_stream(source, inputFile);
+    ERROR_CHECK("Error when steaming sound");
+
+    /*std::cout << "Loading Audio File..." << std::endl;
     SFX_AUDIO audio = sfx_audio_load(inputFile);
     ERROR_CHECK("Error when loading sound");
 
@@ -54,7 +58,7 @@ int main(int argc, const char** argv)
     std::cout << "Unloading source" << std::endl;
     sfx_source_destroy(source);
     ERROR_CHECK("Error when unloading source");
-
+    */
     std::cout << "Cleaning up..." << std::endl;
     sfx_shutdown();
     ERROR_CHECK("Error when cleaning up");
