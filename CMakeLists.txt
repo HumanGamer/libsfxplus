@@ -1,4 +1,9 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.3)
+
+if (MSVC)
+    #Use solution folders. 
+    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+endif()
 
 project(libsfxplus)
 
@@ -60,6 +65,9 @@ add_library(libsfxplus ${LIBRARY_TYPE} ${Main_ALLSRC})
 target_link_libraries(libsfxplus -lpthread ${OPENAL_LIBRARY} ${LIBSNDFILE_LIBRARIES})
 
 set_target_properties(libsfxplus PROPERTIES PREFIX "")
+if (MSVC)
+    set_target_properties(libsfxplus PROPERTIES FOLDER "Library")
+endif()
 
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
