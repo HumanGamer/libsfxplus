@@ -1,4 +1,6 @@
 #include <iostream>
+#include <thread>
+#include <atomic>
 
 #include <sfxplus.h>
 
@@ -22,10 +24,6 @@ int main(int argc, const char** argv)
         return 1;
     }
 
-    std::cout << "Creating source..." << std::endl;
-    SFX_SOURCE source = sfx_source_create();
-    ERROR_CHECK("Error when creating source");
-
     if (argc < 2)
     {
         std::cout << "Error: No audio file specified" << std::endl;
@@ -34,12 +32,35 @@ int main(int argc, const char** argv)
         return 0;
     }
 
-    std::cout << "Streaming sound..." << std::endl;
     const char* inputFile = argv[1];
-    sfx_source_open_stream(source, inputFile);
+
+    std::cout << "Creating source..." << std::endl;
+    SFX_SOURCE source = sfx_source_create();
+    ERROR_CHECK("Error when creating source");
+
+    std::cout << "Streaming sound..." << std::endl;
+    SFX_STREAM stream = sfx_source_open_stream(source, inputFile);
     ERROR_CHECK("Error when steaming sound");
 
-    /*std::cout << "Loading Audio File..." << std::endl;
+    std::cout << "Waiting for playback to finish..." << std::endl;
+    sfx_source_wait(source);
+    ERROR_CHECK("Error when waiting for playback to finish");
+
+    std::cout << "Closing stream..." << std::endl;
+    sfx_source_close_stream(stream);
+    ERROR_CHECK("Error when closing stream");
+
+    std::cout << "Unloading source" << std::endl;
+    sfx_source_destroy(source);
+    ERROR_CHECK("Error when unloading source");
+
+    // ------------------------------------
+
+    /*std::cout << "Creating source..." << std::endl;
+    SFX_SOURCE source = sfx_source_create();
+    ERROR_CHECK("Error when creating source");
+
+    std::cout << "Loading Audio File..." << std::endl;
     SFX_AUDIO audio = sfx_audio_load(inputFile);
     ERROR_CHECK("Error when loading sound");
 
@@ -59,6 +80,7 @@ int main(int argc, const char** argv)
     sfx_source_destroy(source);
     ERROR_CHECK("Error when unloading source");
     */
+
     std::cout << "Cleaning up..." << std::endl;
     sfx_shutdown();
     ERROR_CHECK("Error when cleaning up");

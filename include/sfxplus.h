@@ -44,8 +44,11 @@ extern "C"
 {
 #endif
 
+#define SFX_INVALID_STREAM 0
+
 typedef unsigned int SFX_SOURCE;
 typedef unsigned int SFX_AUDIO;
+typedef unsigned int SFX_STREAM;
 
 enum SFX_ERROR
 {
@@ -55,7 +58,10 @@ enum SFX_ERROR
     SFX_FAIL_CREATE_CONTEXT,
     SFX_FAIL_CREATE_SOURCE,
     SFX_FAIL_CREATE_BUFFER,
+    SFX_FAIL_DELETE_BUFFER,
     SFX_FAIL_PLAY_SOURCE,
+    SFX_FAIL_PAUSE_SOURCE,
+    SFX_FAIL_STOP_SOURCE,
     SFX_FAIL_FILL_BUFFER,
     SFX_FAIL_UNQUEUE_BUFFER,
     SFX_FAIL_QUEUE_BUFFER,
@@ -69,6 +75,7 @@ enum SFX_ERROR
     SFX_INVALID_ENUM,
     SFX_INVALID_VALUE,
     SFX_OUT_OF_MEMORY,
+    SFX_INVALID_OPERATION,
     SFX_UNKNOWN_ERROR = 0x10000
 };
 
@@ -135,7 +142,12 @@ SFXPLUSEXP void SFXPLUSCALL sfx_source_play_sound(SFX_SOURCE source, SFX_AUDIO a
 /*
  * Streams an audio file using the specified source
  */
-SFXPLUSEXP void SFXPLUSCALL sfx_source_open_stream(SFX_SOURCE source, const char* path, int bufferCount = 3);
+SFXPLUSEXP SFX_STREAM SFXPLUSCALL sfx_source_open_stream(SFX_SOURCE source, const char* path, int bufferCount = 3);
+
+/*
+ * Closes an audio stream
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_source_close_stream(SFX_STREAM stream);
 
 /*
  * Checks if the source is playing

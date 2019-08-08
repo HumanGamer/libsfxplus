@@ -1,5 +1,6 @@
 #include "core.h"
 
+#include <stdio.h>
 #include <al.h>
 #include <alc.h>
 
@@ -29,8 +30,14 @@ const char* SFXPLUSCALL sfx_error_string(int error)
         return "SFX_FAIL_CREATE_SOURCE";
     case SFX_FAIL_CREATE_BUFFER:
         return "SFX_FAIL_CREATE_BUFFER";
+    case SFX_FAIL_DELETE_BUFFER:
+        return "SFX_FAIL_DELETE_BUFFER";
     case SFX_FAIL_PLAY_SOURCE:
         return "SFX_FAIL_PLAY_SOURCE";
+    case SFX_FAIL_PAUSE_SOURCE:
+        return "SFX_FAIL_PAUSE_SOURCE";
+    case SFX_FAIL_STOP_SOURCE:
+        return "SFX_FAIL_STOP_SOURCE";
     case SFX_FAIL_FILL_BUFFER:
         return "SFX_FAIL_FILL_BUFFER";
     case SFX_FAIL_UNQUEUE_BUFFER:
@@ -55,6 +62,8 @@ const char* SFXPLUSCALL sfx_error_string(int error)
         return "SFX_INVALID_VALUE";
     case SFX_OUT_OF_MEMORY:
         return "SFX_OUT_OF_MEMORY";
+    case SFX_INVALID_OPERATION:
+        return "SFX_INVALID_OPERATION";
     case SFX_UNKNOWN_ERROR:
     default:
         return "SFX_UNKNOWN_ERROR";
@@ -73,30 +82,56 @@ bool sfx_checkerror_internal()
     return true;
 }
 
-void sfx_setlasterror_internal(int error)
+void sfx_setlasterror_internal(int error, bool alc)
 {
-    switch (error)
+    if (alc)
     {
-    case ALC_NO_ERROR:
-        sfx_last_error = SFX_NO_ERROR;
-        break;
-    case ALC_INVALID_DEVICE:
-        sfx_last_error = SFX_INVALID_DEVICE;
-        break;
-    case ALC_INVALID_CONTEXT:
-        sfx_last_error = SFX_INVALID_CONTEXT;
-        break;
-    case ALC_INVALID_ENUM:
-        sfx_last_error = SFX_INVALID_ENUM;
-        break;
-    case ALC_INVALID_VALUE:
-        sfx_last_error = SFX_INVALID_VALUE;
-        break;
-    case ALC_OUT_OF_MEMORY:
-        sfx_last_error = SFX_OUT_OF_MEMORY;
-        break;
-    default:
-        sfx_last_error = SFX_INTERNAL_ERROR;
-        break;
+        switch (error)
+        {
+        case ALC_NO_ERROR:
+            sfx_last_error = SFX_NO_ERROR;
+            break;
+        case ALC_INVALID_DEVICE:
+            sfx_last_error = SFX_INVALID_DEVICE;
+            break;
+        case ALC_INVALID_CONTEXT:
+            sfx_last_error = SFX_INVALID_CONTEXT;
+            break;
+        case ALC_INVALID_ENUM:
+            sfx_last_error = SFX_INVALID_ENUM;
+            break;
+        case ALC_INVALID_VALUE:
+            sfx_last_error = SFX_INVALID_VALUE;
+            break;
+        case ALC_OUT_OF_MEMORY:
+            sfx_last_error = SFX_OUT_OF_MEMORY;
+            break;
+        default:
+            sfx_last_error = SFX_INTERNAL_ERROR;
+            break;
+        }
+    }
+    else {
+        switch (error)
+        {
+        case AL_NO_ERROR:
+            sfx_last_error = SFX_NO_ERROR;
+            break;
+        case AL_INVALID_ENUM:
+            sfx_last_error = SFX_INVALID_ENUM;
+            break;
+        case AL_INVALID_VALUE:
+            sfx_last_error = SFX_INVALID_VALUE;
+            break;
+        case AL_OUT_OF_MEMORY:
+            sfx_last_error = SFX_OUT_OF_MEMORY;
+            break;
+        case AL_INVALID_OPERATION:
+            sfx_last_error = SFX_INVALID_OPERATION;
+            break;
+        default:
+            sfx_last_error = SFX_INTERNAL_ERROR;
+            break;
+        }
     }
 }

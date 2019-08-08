@@ -1,5 +1,6 @@
 #include "core.h"
 
+#include <thread>
 #include <al.h>
 
 SFX_SOURCE SFXPLUSCALL sfx_source_create(float pitch, float gain, bool looping)
@@ -132,5 +133,10 @@ void SFXPLUSCALL sfx_source_wait(SFX_SOURCE source)
 {
     sfx_last_error = SFX_NO_ERROR;
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
     while (sfx_source_getstate(source) == SFX_SOURCE_STATE_PLAYING);
+
+    if (sfx_signal_kill)
+        sfx_last_error = SFX_NO_ERROR;
 }
