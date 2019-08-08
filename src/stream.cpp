@@ -37,7 +37,7 @@ void SFXPLUSCALL sfx_source_open_stream(SFX_SOURCE source, const char* path)
 
     for (int i = 0; i < bufCount; i++)
     {
-        if (buffers == nullptr)
+        if (buffers == nullptr) // This check is here to prevent warning C6011
             break;
 
         alBufferData(buffers[i],
