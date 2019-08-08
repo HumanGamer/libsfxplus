@@ -12,10 +12,14 @@ std::mutex sfx_stream_io_mutex, sfx_stream_play_mutex;
 std::vector<unsigned short> sfx_stream_data;
 size_t current;
 
-void sfx_add_data_internal(short* first, short* last)
+void sfx_add_data_internal(float* buffer, unsigned int bufferSize)
 {
     std::lock(sfx_stream_io_mutex, sfx_stream_play_mutex);
-    sfx_stream_data.insert(sfx_stream_data.end(), first, last);
+
+    for (int i = 0; i < bufferSize; i++)
+    {
+        sfx_stream_data.push_back((unsigned short)(buffer[i] * 10000.0f));
+    }
 
     sfx_stream_io_mutex.unlock();
     sfx_stream_play_mutex.unlock();
@@ -27,8 +31,8 @@ bool sfx_buffer_data_internal(ALuint buf, ALenum format, ALsizei freq)
     unsigned short* buffer = (&sfx_stream_data.front() + current);
 
     size_t size = sfx_stream_data.size() - current;
-    if (size > 4096)
-        size = 4096;
+    if (size > 2048)
+        size = 2048;
 
     current += size;
 
@@ -48,11 +52,11 @@ void sfx_run_stream_io_internal(SNDFILE* snd)
 {
     sfx_stream_data.clear();
 
-    short read_buf[4096];
+    float read_buf[2048];
 
     size_t read_size = 0;
-    while (sfx_stream_running && (read_size = sf_read_short(snd, read_buf, 4096)) != 0)
-        sfx_add_data_internal(read_buf, read_buf + read_size);
+    while (sfx_stream_running && (read_size = sf_read_float(snd, read_buf, 2048)) != 0)
+        sfx_add_data_internal(read_buf, read_size);
 }
 
 void sfx_run_stream_openal_internal(SFX_SOURCE source, int bufCount, SF_INFO sfinfo)
