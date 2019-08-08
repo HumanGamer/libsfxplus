@@ -27,12 +27,14 @@ SFX_AUDIO SFXPLUSCALL sfx_audio_load(const char* path)
         return 0;
     }
 
+    sf_command(snd, SFC_SET_SCALE_FLOAT_INT_READ, (void*)SF_TRUE, sizeof(SF_TRUE));
+
     std::vector<unsigned short> data;
 
-    short read_buf[4096];
+    short read_buf[2048];
 
     size_t read_size = 0;
-    while ((read_size = sf_read_short(snd, read_buf, 4096)) != 0)
+    while ((read_size = sf_read_short(snd, read_buf, 2048)) != 0)
     {
         data.insert(data.end(), read_buf, read_buf + read_size);
     }

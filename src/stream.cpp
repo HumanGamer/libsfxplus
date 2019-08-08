@@ -25,16 +25,11 @@ std::map<SFX_STREAM, bool> sfx_stream_running;
 std::map<SFX_STREAM, std::vector<unsigned short>> sfx_stream_data;
 std::map<SFX_STREAM, size_t> sfx_stream_current;
 
-void sfx_add_data_internal(SFX_STREAM stream, float* buffer, unsigned int bufferSize)
+void sfx_add_data_internal(SFX_STREAM stream, short* buffer, unsigned int bufferSize)
 {
     std::lock(sfx_stream_io_mutex, sfx_stream_playback_mutex);
 
-    for (int i = 0; i < bufferSize; i++)
-    {
-        if (!sfx_stream_running[stream])
-            break;
-        sfx_stream_data[stream].push_back((unsigned short)(buffer[i] * 10000.0f));
-    }
+    sfx_stream_data[stream].insert(sfx_stream_data[stream].end(), buffer, buffer + bufferSize);
 
     sfx_stream_io_mutex.unlock();
     sfx_stream_playback_mutex.unlock();
@@ -67,10 +62,10 @@ void sfx_run_stream_io_internal(SFX_STREAM stream, SNDFILE* snd)
 {
     sfx_stream_data[stream].clear();
 
-    float read_buf[2048];
+    short read_buf[2048];
 
     size_t read_size = 0;
-    while (sfx_stream_running[stream] && (read_size = sf_read_float(snd, read_buf, 2048)) != 0)
+    while (sfx_stream_running[stream] && (read_size = sf_read_short(snd, read_buf, 2048)) != 0)
         sfx_add_data_internal(stream, read_buf, read_size);
 }
 
@@ -253,6 +248,8 @@ SFX_STREAM SFXPLUSCALL sfx_source_open_stream(SFX_SOURCE source, const char* pat
         sfx_last_error = SFX_FAIL_READ_FILE;
         return SFX_INVALID_STREAM;
     }
+
+    sf_command(snd, SFC_SET_SCALE_FLOAT_INT_READ, (void*)SF_TRUE, sizeof(SF_TRUE));
 
     SFX_STREAM_THREADS threads;
     threads.io = std::make_shared<std::thread>(sfx_run_stream_io_internal, stream, snd);
