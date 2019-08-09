@@ -130,9 +130,19 @@ SFXPLUSEXP void SFXPLUSCALL sfx_source_pitch(SFX_SOURCE source, float pitch);
 SFXPLUSEXP void SFXPLUSCALL sfx_source_gain(SFX_SOURCE source, float gain);
 
 /*
- * Set whether or not the audio source should loop
+ * Sets whether or not the audio source should loop
  */
 SFXPLUSEXP void SFXPLUSCALL sfx_source_looping(SFX_SOURCE source, bool looping);
+
+/*
+ * Sets the audio source position
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_source_position(SFX_SOURCE source, float x, float y, float z);
+
+/*
+ * Sets the audio source velocity
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_source_velocity(SFX_SOURCE source, float x, float y, float z);
 
 /*
  * Plays a sound using the specified source

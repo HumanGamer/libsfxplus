@@ -82,6 +82,30 @@ void SFXPLUSCALL sfx_source_looping(SFX_SOURCE source, bool looping)
     }
 }
 
+void SFXPLUSCALL sfx_source_position(SFX_SOURCE source, float x, float y, float z)
+{
+    sfx_last_error = SFX_NO_ERROR;
+
+    alSource3f(source, AL_POSITION, x, y, z);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_SET_PROPERTY;
+        return;
+    }
+}
+
+void SFXPLUSCALL sfx_source_velocity(SFX_SOURCE source, float x, float y, float z)
+{
+    sfx_last_error = SFX_NO_ERROR;
+
+    alSource3f(source, AL_VELOCITY, x, y, z);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_SET_PROPERTY;
+        return;
+    }
+}
+
 void SFXPLUSCALL sfx_source_attach_sound(SFX_SOURCE source, SFX_AUDIO audio)
 {
     sfx_last_error = SFX_NO_ERROR;
