@@ -39,7 +39,7 @@ set (Main_SRC
     src/init.cpp
     src/source.cpp
     src/stream.cpp
-    src/loader.cpp
+    src/file.cpp
     src/error.cpp
 )
 

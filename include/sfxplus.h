@@ -162,12 +162,12 @@ SFXPLUSEXP void SFXPLUSCALL sfx_source_wait(SFX_SOURCE source);
 /*
  * Loads audio from file
  */
-SFXPLUSEXP SFX_AUDIO SFXPLUSCALL sfx_audio_load(const char* path);
+SFXPLUSEXP SFX_AUDIO SFXPLUSCALL sfx_file_load(const char* path);
 
 /*
  * Destroys audio handle
  */
-SFXPLUSEXP void SFXPLUSCALL sfx_audio_destroy(SFX_AUDIO audio);
+SFXPLUSEXP void SFXPLUSCALL sfx_file_destroy(SFX_AUDIO audio);
 
 #ifdef __cplusplus
 }
