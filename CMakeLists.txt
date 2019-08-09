@@ -39,7 +39,7 @@ set (Main_SRC
     src/init.cpp
     src/source.cpp
     src/stream.cpp
-    src/audio3d.cpp
+    src/listener.cpp
     src/file.cpp
     src/error.cpp
 )

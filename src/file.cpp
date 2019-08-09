@@ -5,7 +5,7 @@
 #include <sndfile.h>
 #include <al.h>
 
-SFX_AUDIO SFXPLUSCALL sfx_file_load(const char* path)
+SFX_AUDIO SFXPLUSCALL sfx_audiofile_load(const char* path)
 {
     sfx_last_error = SFX_NO_ERROR;
 
@@ -50,7 +50,7 @@ SFX_AUDIO SFXPLUSCALL sfx_file_load(const char* path)
     return buffer;
 }
 
-void SFXPLUSCALL sfx_file_destroy(SFX_AUDIO audio)
+void SFXPLUSCALL sfx_audiofile_destroy(SFX_AUDIO audio)
 {
     sfx_last_error = SFX_NO_ERROR;
 
