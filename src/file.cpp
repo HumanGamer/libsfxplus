@@ -52,5 +52,12 @@ SFX_AUDIO SFXPLUSCALL sfx_file_load(const char* path)
 
 void SFXPLUSCALL sfx_file_destroy(SFX_AUDIO audio)
 {
+    sfx_last_error = SFX_NO_ERROR;
+
     alDeleteBuffers(1, &audio);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_DELETE_BUFFER;
+        return;
+    }
 }

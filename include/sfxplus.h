@@ -137,7 +137,22 @@ SFXPLUSEXP void SFXPLUSCALL sfx_source_looping(SFX_SOURCE source, bool looping);
 /*
  * Plays a sound using the specified source
  */
-SFXPLUSEXP void SFXPLUSCALL sfx_source_play_sound(SFX_SOURCE source, SFX_AUDIO audio);
+SFXPLUSEXP void SFXPLUSCALL sfx_source_attach_sound(SFX_SOURCE source, SFX_AUDIO audio);
+
+/*
+ * Plays a source
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_source_play(SFX_SOURCE source);
+
+/*
+ * Pauses a source
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_source_pause(SFX_SOURCE source);
+
+/*
+ * Stops a source
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_source_stop(SFX_SOURCE source);
 
 /*
  * Streams an audio file using the specified source

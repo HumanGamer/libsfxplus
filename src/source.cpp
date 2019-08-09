@@ -82,7 +82,7 @@ void SFXPLUSCALL sfx_source_looping(SFX_SOURCE source, bool looping)
     }
 }
 
-void SFXPLUSCALL sfx_source_play_sound(SFX_SOURCE source, SFX_AUDIO audio)
+void SFXPLUSCALL sfx_source_attach_sound(SFX_SOURCE source, SFX_AUDIO audio)
 {
     sfx_last_error = SFX_NO_ERROR;
 
@@ -92,11 +92,40 @@ void SFXPLUSCALL sfx_source_play_sound(SFX_SOURCE source, SFX_AUDIO audio)
         sfx_last_error = SFX_FAIL_QUEUE_BUFFER;
         return;
     }
+}
+
+void SFXPLUSCALL sfx_source_play(SFX_SOURCE source)
+{
+    sfx_last_error = SFX_NO_ERROR;
 
     alSourcePlay(source);
     if (!sfx_checkerror_internal())
     {
         sfx_last_error = SFX_FAIL_PLAY_SOURCE;
+        return;
+    }
+}
+
+void SFXPLUSCALL sfx_source_pause(SFX_SOURCE source)
+{
+    sfx_last_error = SFX_NO_ERROR;
+
+    alSourcePause(source);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_PAUSE_SOURCE;
+        return;
+    }
+}
+
+void SFXPLUSCALL sfx_source_stop(SFX_SOURCE source)
+{
+    sfx_last_error = SFX_NO_ERROR;
+
+    alSourceStop(source);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_STOP_SOURCE;
         return;
     }
 }

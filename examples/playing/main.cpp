@@ -40,9 +40,13 @@ int main(int argc, const char** argv)
     SFX_AUDIO audio = sfx_file_load(inputFile);
     ERROR_CHECK("Error when loading sound");
 
-    std::cout << "Playing Audio File..." << std::endl;
-    sfx_source_play_sound(source, audio);
-    ERROR_CHECK("Error when playing sound with source");
+    std::cout << "Attaching Audio File..." << std::endl;
+    sfx_source_attach_sound(source, audio);
+    ERROR_CHECK("Error when attaching audio to source");
+
+    std::cout << "Playing Audio..." << std::endl;
+    sfx_source_play(source);
+    ERROR_CHECK("Error when playing audio");
 
     std::cout << "Waiting for playback to finish..." << std::endl;
     sfx_source_wait(source);
