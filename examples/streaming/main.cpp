@@ -36,9 +36,13 @@ int main(int argc, const char** argv)
     SFX_SOURCE source = sfx_source_create();
     ERROR_CHECK("Error when creating source");
 
-    std::cout << "Streaming sound..." << std::endl;
+    std::cout << "Opening audio stream..." << std::endl;
     SFX_STREAM stream = sfx_source_open_stream(source, inputFile);
-    ERROR_CHECK("Error when steaming sound");
+    ERROR_CHECK("Error when opening audio stream");
+
+    std::cout << "Playing Audio..." << std::endl;
+    sfx_source_play(source);
+    ERROR_CHECK("Error when playing audio");
 
     std::cout << "Waiting for playback to finish..." << std::endl;
     sfx_source_wait(source);

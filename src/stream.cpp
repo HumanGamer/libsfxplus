@@ -103,11 +103,21 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
         return;
     }
 
-    alSourcePlay(source);
-    if (!sfx_checkerror_internal())
+    while (true)
     {
-        sfx_last_error = SFX_FAIL_PLAY_SOURCE;
-        return;
+        int state;
+        alGetSourcei(source, AL_SOURCE_STATE, &state);
+        if (!sfx_checkerror_internal())
+        {
+            sfx_last_error = SFX_FAIL_GET_STATE;
+            return;
+        }
+
+        if (state == AL_PLAYING)
+            break;
+
+        if (!sfx_stream_running[stream])
+            return;
     }
 
     unsigned int buf;
