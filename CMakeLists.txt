@@ -38,8 +38,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/sfxplus_config.h.in ${CMAKE_CU
 set (Main_SRC
     src/init.cpp
     src/source.cpp
-    src/audio.cpp
     src/stream.cpp
+    src/loader.cpp
     src/error.cpp
 )
 
