@@ -193,8 +193,12 @@ void SFXPLUSCALL sfx_source_wait(SFX_SOURCE source)
     do
     {
         state = sfx_source_getstate(source);
+        if (sfx_error() != SFX_NO_ERROR)
+            return;
     } while (state == SFX_SOURCE_STATE_PLAYING || state == SFX_SOURCE_STATE_PAUSED);
 
     if (sfx_signal_kill)
         sfx_last_error = SFX_NO_ERROR;
+    else
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
