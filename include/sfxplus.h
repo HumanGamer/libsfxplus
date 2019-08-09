@@ -160,14 +160,29 @@ SFXPLUSEXP int SFXPLUSCALL sfx_source_getstate(SFX_SOURCE source);
 SFXPLUSEXP void SFXPLUSCALL sfx_source_wait(SFX_SOURCE source);
 
 /*
- * Loads audio from file
+ * Loads audio file from file
  */
 SFXPLUSEXP SFX_AUDIO SFXPLUSCALL sfx_file_load(const char* path);
 
 /*
- * Destroys audio handle
+ * Destroys audio file handle
  */
 SFXPLUSEXP void SFXPLUSCALL sfx_file_destroy(SFX_AUDIO audio);
+
+/*
+ * Sets the listener position
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_listener_position(float x, float y, float z);
+
+/*
+ * Sets the listener velocity
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_listener_velocity(float x, float y, float z);
+
+/*
+ * Sets the listener orientation
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_listener_orientation(float forward_x, float forward_y, float forward_z, float up_x, float up_y, float up_z);
 
 #ifdef __cplusplus
 }
