@@ -37,7 +37,7 @@ int main(int argc, const char** argv)
     ERROR_CHECK("Error when creating source");
 
     std::cout << "Loading Audio File..." << std::endl;
-    SFX_AUDIO audio = sfx_audio_load(inputFile);
+    SFX_AUDIO audio = sfx_file_load(inputFile);
     ERROR_CHECK("Error when loading sound");
 
     std::cout << "Playing Audio File..." << std::endl;
@@ -49,7 +49,7 @@ int main(int argc, const char** argv)
     ERROR_CHECK("Error when waiting for playback to finish");
 
     std::cout << "Unloading audio" << std::endl;
-    sfx_audio_destroy(audio);
+    sfx_file_destroy(audio);
     ERROR_CHECK("Error when unloading audio");
 
     std::cout << "Unloading source" << std::endl;
