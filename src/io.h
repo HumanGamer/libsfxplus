@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 struct SFX_FILE_HANDLE;
 
 struct SFX_FILE
