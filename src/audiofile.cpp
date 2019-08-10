@@ -1,8 +1,8 @@
 #include "core.h"
+#include "io.h"
 
 #include <vector>
 #include <cstring>
-#include <sndfile.h>
 #include <al.h>
 
 SFX_AUDIO SFXPLUSCALL sfx_audiofile_load(const char* path)
@@ -17,30 +17,25 @@ SFX_AUDIO SFXPLUSCALL sfx_audiofile_load(const char* path)
         return 0;
     }
 
-    SF_INFO sfinfo;
-    memset(&sfinfo, 0, sizeof(sfinfo));
-
-    SNDFILE* snd = sf_open(path, SFM_READ, &sfinfo);
-    if (snd == nullptr)
+    SFX_FILE* file = sfx_io_open(path);
+    if (file == nullptr)
     {
         sfx_last_error = SFX_FAIL_READ_FILE;
         return 0;
     }
 
-    sf_command(snd, SFC_SET_SCALE_FLOAT_INT_READ, (void*)SF_TRUE, sizeof(SF_TRUE));
-
     std::vector<unsigned short> data;
 
-    short read_buf[2048];
+    unsigned short read_buf[2048];
 
     size_t read_size = 0;
-    while ((read_size = sf_read_short(snd, read_buf, 2048)) != 0)
+    while ((read_size = sfx_io_read(file, read_buf, 2048)) != 0)
     {
         data.insert(data.end(), read_buf, read_buf + read_size);
     }
 
-    alBufferData(buffer, sfinfo.channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-        &data.front(), data.size() * sizeof(unsigned short), sfinfo.samplerate);
+    alBufferData(buffer, file->channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
+        &data.front(), data.size() * sizeof(unsigned short), file->sample_rate);
     if (!sfx_checkerror_internal())
     {
         sfx_last_error = SFX_FAIL_FILL_BUFFER;

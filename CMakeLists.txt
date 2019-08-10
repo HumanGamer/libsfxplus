@@ -41,11 +41,13 @@ set (Main_SRC
     src/stream.cpp
     src/listener.cpp
     src/audiofile.cpp
+    src/io.cpp
     src/error.cpp
 )
 
 set (Main_PRIVATE_HDR
     src/core.h
+    src/io.h
 )
 
 set (Main_PUBLIC_HDR

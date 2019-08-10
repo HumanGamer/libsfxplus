@@ -1,4 +1,5 @@
 #include "core.h"
+#include "io.h"
 
 #include <thread>
 #include <mutex>
@@ -6,7 +7,6 @@
 #include <map>
 #include <cstring>
 #include <algorithm>
-#include <sndfile.h>
 #include <al.h>
 
 std::mutex sfx_stream_io_mutex, sfx_stream_playback_mutex;
@@ -25,7 +25,7 @@ std::map<SFX_STREAM, bool> sfx_stream_running;
 std::map<SFX_STREAM, std::vector<unsigned short>> sfx_stream_data;
 std::map<SFX_STREAM, size_t> sfx_stream_current;
 
-void sfx_add_data_internal(SFX_STREAM stream, short* buffer, unsigned int bufferSize)
+void sfx_add_data_internal(SFX_STREAM stream, unsigned short* buffer, unsigned int bufferSize)
 {
     std::lock(sfx_stream_io_mutex, sfx_stream_playback_mutex);
 
@@ -58,18 +58,18 @@ bool sfx_buffer_data_internal(SFX_STREAM stream, ALuint buf, ALenum format, ALsi
     return true;
 }
 
-void sfx_run_stream_io_internal(SFX_STREAM stream, SNDFILE* snd)
+void sfx_run_stream_io_internal(SFX_STREAM stream, SFX_FILE* snd)
 {
     sfx_stream_data[stream].clear();
 
-    short read_buf[2048];
+    unsigned short read_buf[2048];
 
     size_t read_size = 0;
-    while (sfx_stream_running[stream] && (read_size = sf_read_short(snd, read_buf, 2048)) != 0)
+    while (sfx_stream_running[stream] && (read_size = sfx_io_read(snd, read_buf, 2048)) != 0)
         sfx_add_data_internal(stream, read_buf, read_size);
 }
 
-void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bufCount, SF_INFO sfinfo)
+void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bufCount, SFX_FILE* file)
 {
     sfx_stream_current[stream] = 0;
     ALuint* buffers = new ALuint[bufCount];
@@ -86,8 +86,8 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
             break;
 
         sfx_buffer_data_internal(stream, buffers[i],
-            sfinfo.channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-            sfinfo.samplerate);
+            file->channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
+            file->sample_rate);
 
         if (!sfx_checkerror_internal())
         {
@@ -143,8 +143,8 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
             numProcessed--;
 
             if (sfx_buffer_data_internal(stream, buf,
-                sfinfo.channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
-                sfinfo.samplerate))
+                file->channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16,
+                file->sample_rate))
             {
                 if (!sfx_checkerror_internal())
                 {
@@ -181,7 +181,7 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
             if (queued == 0)
             {
                 if (sfx_source_get_looping_internal(source))
-                    sfx_run_stream_openal_internal(stream, source, bufCount, sfinfo);
+                    sfx_run_stream_openal_internal(stream, source, bufCount, file);
                 else
                     sfx_stream_running[stream] = false;
                 return;
@@ -252,22 +252,17 @@ SFX_STREAM SFXPLUSCALL sfx_source_open_stream(SFX_SOURCE source, const char* pat
     sfx_stream_source[stream] = source;
     sfx_stream_running[stream] = true;
 
-    SF_INFO sfinfo;
-    memset(&sfinfo, 0, sizeof(sfinfo));
-
-    SNDFILE* snd = sf_open(path, SFM_READ, &sfinfo);
-    if (snd == nullptr)
+    SFX_FILE* file = sfx_io_open(path);
+    if (file == nullptr)
     {
         sfx_last_error = SFX_FAIL_READ_FILE;
         return SFX_INVALID_STREAM;
     }
 
-    sf_command(snd, SFC_SET_SCALE_FLOAT_INT_READ, (void*)SF_TRUE, sizeof(SF_TRUE));
-
     SFX_STREAM_THREADS threads;
-    threads.io = std::make_shared<std::thread>(sfx_run_stream_io_internal, stream, snd);
+    threads.io = std::make_shared<std::thread>(sfx_run_stream_io_internal, stream, file);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    threads.playback = std::make_shared<std::thread>(sfx_run_stream_openal_internal, stream, source, bufferCount, sfinfo);
+    threads.playback = std::make_shared<std::thread>(sfx_run_stream_openal_internal, stream, source, bufferCount, file);
 
     sfx_stream_thread[stream] = threads;
 
