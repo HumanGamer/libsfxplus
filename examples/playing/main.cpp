@@ -52,6 +52,10 @@ int main(int argc, const char** argv)
     sfx_source_wait(source);
     ERROR_CHECK("Error when waiting for playback to finish");
 
+    std::cout << "Detaching Audio File..." << std::endl;
+    sfx_source_detach_sound(source);
+    ERROR_CHECK("Error when detaching audio from source");
+
     std::cout << "Unloading audio" << std::endl;
     sfx_audiofile_destroy(audio);
     ERROR_CHECK("Error when unloading audio");

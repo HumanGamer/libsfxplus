@@ -214,6 +214,18 @@ void SFXPLUSCALL sfx_source_attach_sound(SFX_SOURCE source, SFX_AUDIO audio)
     }
 }
 
+void SFXPLUSCALL sfx_source_detach_sound(SFX_SOURCE source)
+{
+    sfx_last_error = SFX_NO_ERROR;
+
+    alSourcei(source, AL_BUFFER, 0);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_QUEUE_BUFFER;
+        return;
+    }
+}
+
 void SFXPLUSCALL sfx_source_play(SFX_SOURCE source)
 {
     std::lock(sfx_source_check_thread_mutex, sfx_source_check_normal_mutex);

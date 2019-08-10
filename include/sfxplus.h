@@ -145,9 +145,14 @@ SFXPLUSEXP void SFXPLUSCALL sfx_source_position(SFX_SOURCE source, float x, floa
 SFXPLUSEXP void SFXPLUSCALL sfx_source_velocity(SFX_SOURCE source, float x, float y, float z);
 
 /*
- * Plays a sound using the specified source
+ * Attaches a sound to the specified source
  */
 SFXPLUSEXP void SFXPLUSCALL sfx_source_attach_sound(SFX_SOURCE source, SFX_AUDIO audio);
+
+/*
+ * Detaches any sounds from the specified source
+ */
+SFXPLUSEXP void SFXPLUSCALL sfx_source_detach_sound(SFX_SOURCE source);
 
 /*
  * Plays a source
