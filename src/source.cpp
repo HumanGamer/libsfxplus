@@ -172,7 +172,8 @@ void SFXPLUSCALL sfx_source_looping(SFX_SOURCE source, bool looping)
     sfx_last_error = SFX_NO_ERROR;
 
     sfx_source_should_loop_list[source] = looping;
-    sfx_source_looping_list[source] = looping;
+    if (!looping)
+        sfx_source_looping_list[source] = false;
 
     sfx_source_check_thread_mutex.unlock();
     sfx_source_check_normal_mutex.unlock();
