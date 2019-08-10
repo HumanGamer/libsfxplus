@@ -40,7 +40,7 @@ set (Main_SRC
     src/source.cpp
     src/stream.cpp
     src/listener.cpp
-    src/file.cpp
+    src/audiofile.cpp
     src/error.cpp
 )
 
