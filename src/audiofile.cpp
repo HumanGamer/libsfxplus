@@ -39,8 +39,12 @@ SFX_AUDIO SFXPLUSCALL sfx_audiofile_load(const char* path)
     if (!sfx_checkerror_internal())
     {
         sfx_last_error = SFX_FAIL_FILL_BUFFER;
+
+        sfx_io_close(file);
         return 0;
     }
+
+    sfx_io_close(file);
 
     return buffer;
 }

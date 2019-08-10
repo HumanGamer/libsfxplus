@@ -196,6 +196,8 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
         }
     }
 
+    sfx_io_close(file);
+
     alSourceStop(source);
     if (!sfx_checkerror_internal())
     {

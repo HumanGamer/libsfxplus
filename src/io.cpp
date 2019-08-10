@@ -32,6 +32,13 @@ SFX_FILE* sfx_io_open(const char* path)
     return info;
 }
 
+void sfx_io_close(SFX_FILE* file)
+{
+    sf_close(file->file->file);
+    delete(file->file);
+    delete(file);
+}
+
 size_t sfx_io_read(SFX_FILE* file, unsigned short* ptr, size_t items)
 {
     return sf_read_short(file->file->file, (short*)ptr, items);
