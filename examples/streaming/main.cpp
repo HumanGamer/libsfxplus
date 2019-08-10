@@ -33,7 +33,7 @@ int main(int argc, const char** argv)
     const char* inputFile = argv[1];
 
     std::cout << "Creating source..." << std::endl;
-    SFX_SOURCE source = sfx_source_create();
+    SFX_SOURCE source = sfx_source_create(true);
     ERROR_CHECK("Error when creating source");
 
     std::cout << "Opening audio stream..." << std::endl;
@@ -47,20 +47,6 @@ int main(int argc, const char** argv)
     std::cout << "Waiting for playback to finish..." << std::endl;
     sfx_source_wait(source);
     ERROR_CHECK("Error when waiting for playback to finish");
-
-    std::cout << "Getting end state..." << std::endl;
-    int state = sfx_source_getstate(source);
-    ERROR_CHECK("Error when getting state");
-    if (state == SFX_SOURCE_STATE_INITIAL)
-        std::cout << "State: Initial" << std::endl;
-    else if (state == SFX_SOURCE_STATE_STOPPED)
-        std::cout << "State: Stopped" << std::endl;
-    else if (state == SFX_SOURCE_STATE_PAUSED)
-        std::cout << "State: Paused" << std::endl;
-    else if (state == SFX_SOURCE_STATE_PLAYING)
-        std::cout << "State: Playing" << std::endl;
-    else
-        std::cout << "State: ???" << std::endl;
 
     std::cout << "Closing stream..." << std::endl;
     sfx_source_close_stream(stream);

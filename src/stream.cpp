@@ -180,7 +180,10 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
             }
             if (queued == 0)
             {
-                sfx_stream_running[stream] = false;
+                if (sfx_source_get_looping_internal(source))
+                    sfx_run_stream_openal_internal(stream, source, bufCount, sfinfo);
+                else
+                    sfx_stream_running[stream] = false;
                 return;
             }
 

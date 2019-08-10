@@ -1,20 +1,41 @@
 #include "core.h"
 
+#include <thread>
 #include <csignal>
 #include <al.h>
 #include <alc.h>
 #include <stdio.h>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 bool sfx_initialized = false;
+
+bool sfx_shuttingdown = false;
 
 bool sfx_signal_kill = false;
 
 ALCdevice* alc_device = nullptr;
 ALCcontext* alc_context = nullptr;
 
+std::thread sfx_source_loop_thread;
+
 int sfx_last_error = SFX_NO_ERROR;
 
 void sfx_signal_handler_internal(int signum);
+
+#ifdef _WIN32
+BOOL ctrl_handler(DWORD event)
+{
+    if (event == CTRL_CLOSE_EVENT) {
+        sfx_signal_kill = true;
+        sfx_shutdown();
+        return TRUE;
+    }
+    return FALSE;
+}
+#endif
 
 bool SFXPLUSCALL sfx_startup()
 {
@@ -24,6 +45,10 @@ bool SFXPLUSCALL sfx_startup()
         return true;
 
     signal(SIGINT, sfx_signal_handler_internal);
+
+#ifdef _WIN32
+    SetConsoleCtrlHandler((PHANDLER_ROUTINE)(ctrl_handler), TRUE);
+#endif
 
     alc_device = alcOpenDevice(nullptr);
     if (alc_device == nullptr)
@@ -56,6 +81,8 @@ bool SFXPLUSCALL sfx_startup()
         return false;
     }
 
+    sfx_source_loop_thread = std::thread(sfx_source_run_loop_thread_internal);
+
     sfx_initialized = true;
     return true;
 }
@@ -65,6 +92,11 @@ void SFXPLUSCALL sfx_shutdown()
     if (!sfx_initialized)
         return;
     sfx_last_error = SFX_NO_ERROR;
+
+    sfx_shuttingdown = true;
+
+    if (sfx_source_loop_thread.joinable())
+        sfx_source_loop_thread.join();
 
     sfx_source_close_streams_internal();
 

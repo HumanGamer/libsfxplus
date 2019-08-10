@@ -1,10 +1,94 @@
 #include "core.h"
 
 #include <thread>
+#include <map>
+#include <vector>
+#include <mutex>
+#include <algorithm>
 #include <al.h>
 
-SFX_SOURCE SFXPLUSCALL sfx_source_create(float pitch, float gain, bool looping)
+std::mutex sfx_source_check_thread_mutex, sfx_source_check_normal_mutex;
+
+extern std::mutex sfx_stream_playback_mutex;
+
+std::map<SFX_SOURCE, bool> sfx_source_should_loop_list;
+std::map<SFX_SOURCE, bool> sfx_source_looping_list;
+std::vector<SFX_SOURCE> sfx_source_list;
+
+bool sfx_source_get_looping_internal(SFX_SOURCE source)
 {
+    std::lock(sfx_source_check_thread_mutex, sfx_stream_playback_mutex, sfx_source_check_normal_mutex);
+    sfx_last_error = SFX_NO_ERROR;
+
+    bool result = sfx_source_looping_list[source];
+
+    sfx_source_check_thread_mutex.unlock();
+    sfx_stream_playback_mutex.unlock();
+    sfx_source_check_normal_mutex.unlock();
+
+    return result;
+}
+
+bool sfx_source_loop_check_internal(SFX_SOURCE source)
+{
+    int source_state;
+    alGetSourcei(source, AL_SOURCE_STATE, &source_state);
+    if (!sfx_checkerror_internal())
+    {
+        sfx_last_error = SFX_FAIL_GET_STATE;
+        return false;
+    }
+
+    if (source_state == AL_STOPPED)
+        return true;
+
+    return false;
+}
+
+void sfx_source_check_sources_internal()
+{
+    std::lock(sfx_source_check_normal_mutex, sfx_source_check_thread_mutex);
+    int current = sfx_source_list.size() - 1;
+    while (!sfx_shuttingdown && current >= 0 && current < sfx_source_list.size())
+    {
+        SFX_SOURCE source = sfx_source_list[current];
+
+        if (!sfx_source_should_loop_list[source] || !sfx_source_looping_list[source])
+        {
+            current--;
+            continue;
+        }
+
+        if (sfx_source_loop_check_internal(source))
+        {
+            alSourcePlay(source);
+            if (!sfx_checkerror_internal())
+            {
+                sfx_last_error = SFX_FAIL_PLAY_SOURCE;
+                sfx_source_check_thread_mutex.unlock();
+                sfx_source_check_normal_mutex.unlock();
+                return;
+            }
+        }
+
+        current--;
+    }
+
+    sfx_source_check_normal_mutex.unlock();
+    sfx_source_check_thread_mutex.unlock();
+}
+
+void sfx_source_run_loop_thread_internal()
+{
+    while (!sfx_shuttingdown)
+    {
+        sfx_source_check_sources_internal();
+    }
+}
+
+SFX_SOURCE SFXPLUSCALL sfx_source_create(bool looping, float pitch, float gain)
+{
+    std::lock(sfx_source_check_thread_mutex, sfx_source_check_normal_mutex);
     sfx_last_error = SFX_NO_ERROR;
 
     ALuint source;
@@ -12,6 +96,8 @@ SFX_SOURCE SFXPLUSCALL sfx_source_create(float pitch, float gain, bool looping)
     if (!sfx_checkerror_internal())
     {
         sfx_last_error = SFX_FAIL_CREATE_SOURCE;
+        sfx_source_check_thread_mutex.unlock();
+        sfx_source_check_normal_mutex.unlock();
         return 0;
     }
 
@@ -19,6 +105,8 @@ SFX_SOURCE SFXPLUSCALL sfx_source_create(float pitch, float gain, bool looping)
     if (!sfx_checkerror_internal())
     {
         sfx_last_error = SFX_FAIL_CREATE_SOURCE;
+        sfx_source_check_thread_mutex.unlock();
+        sfx_source_check_normal_mutex.unlock();
         return 0;
     }
 
@@ -26,24 +114,32 @@ SFX_SOURCE SFXPLUSCALL sfx_source_create(float pitch, float gain, bool looping)
     if (!sfx_checkerror_internal())
     {
         sfx_last_error = SFX_FAIL_CREATE_SOURCE;
+        sfx_source_check_thread_mutex.unlock();
+        sfx_source_check_normal_mutex.unlock();
         return 0;
     }
 
-    alSourcei(source, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
-    if (!sfx_checkerror_internal())
-    {
-        sfx_last_error = SFX_FAIL_CREATE_SOURCE;
-        return 0;
-    }
+    sfx_source_list.push_back(source);
+    sfx_source_should_loop_list[source] = looping;
+    sfx_source_looping_list[source] = false;
+
+    sfx_source_check_thread_mutex.unlock();
+    sfx_source_check_normal_mutex.unlock();
 
     return source;
 }
 
 void SFXPLUSCALL sfx_source_destroy(SFX_SOURCE source)
 {
+    std::lock(sfx_source_check_thread_mutex, sfx_source_check_normal_mutex);
     sfx_last_error = SFX_NO_ERROR;
 
+    std::remove(sfx_source_list.begin(), sfx_source_list.end(), source);
+
     alDeleteSources(1, &source);
+
+    sfx_source_check_thread_mutex.unlock();
+    sfx_source_check_normal_mutex.unlock();
 }
 
 void SFXPLUSCALL sfx_source_pitch(SFX_SOURCE source, float pitch)
@@ -72,14 +168,14 @@ void SFXPLUSCALL sfx_source_gain(SFX_SOURCE source, float gain)
 
 void SFXPLUSCALL sfx_source_looping(SFX_SOURCE source, bool looping)
 {
+    std::lock(sfx_source_check_thread_mutex, sfx_source_check_normal_mutex);
     sfx_last_error = SFX_NO_ERROR;
 
-    alSourcei(source, AL_LOOPING, looping ? AL_TRUE : AL_FALSE);
-    if (!sfx_checkerror_internal())
-    {
-        sfx_last_error = SFX_FAIL_SET_PROPERTY;
-        return;
-    }
+    sfx_source_should_loop_list[source] = looping;
+    sfx_source_looping_list[source] = looping;
+
+    sfx_source_check_thread_mutex.unlock();
+    sfx_source_check_normal_mutex.unlock();
 }
 
 void SFXPLUSCALL sfx_source_position(SFX_SOURCE source, float x, float y, float z)
@@ -120,14 +216,23 @@ void SFXPLUSCALL sfx_source_attach_sound(SFX_SOURCE source, SFX_AUDIO audio)
 
 void SFXPLUSCALL sfx_source_play(SFX_SOURCE source)
 {
+    std::lock(sfx_source_check_thread_mutex, sfx_source_check_normal_mutex);
+
+    sfx_source_looping_list[source] = sfx_source_should_loop_list[source];
+
     sfx_last_error = SFX_NO_ERROR;
 
     alSourcePlay(source);
     if (!sfx_checkerror_internal())
     {
         sfx_last_error = SFX_FAIL_PLAY_SOURCE;
+        sfx_source_check_thread_mutex.unlock();
+        sfx_source_check_normal_mutex.unlock();
         return;
     }
+
+    sfx_source_check_thread_mutex.unlock();
+    sfx_source_check_normal_mutex.unlock();
 }
 
 void SFXPLUSCALL sfx_source_pause(SFX_SOURCE source)
@@ -144,14 +249,23 @@ void SFXPLUSCALL sfx_source_pause(SFX_SOURCE source)
 
 void SFXPLUSCALL sfx_source_stop(SFX_SOURCE source)
 {
+    std::lock(sfx_source_check_thread_mutex, sfx_source_check_normal_mutex);
+
+    sfx_source_looping_list[source] = false;
+
     sfx_last_error = SFX_NO_ERROR;
 
     alSourceStop(source);
     if (!sfx_checkerror_internal())
     {
         sfx_last_error = SFX_FAIL_STOP_SOURCE;
+        sfx_source_check_thread_mutex.unlock();
+        sfx_source_check_normal_mutex.unlock();
         return;
     }
+
+    sfx_source_check_thread_mutex.unlock();
+    sfx_source_check_normal_mutex.unlock();
 }
 
 int SFXPLUSCALL sfx_source_getstate(SFX_SOURCE source)
@@ -194,8 +308,12 @@ void SFXPLUSCALL sfx_source_wait(SFX_SOURCE source)
     {
         state = sfx_source_getstate(source);
         if (sfx_error() != SFX_NO_ERROR)
+        {
+            if (sfx_signal_kill)
+                break;
             return;
-    } while (state == SFX_SOURCE_STATE_PLAYING || state == SFX_SOURCE_STATE_PAUSED);
+        }
+    } while (sfx_source_get_looping_internal(source) || (state == SFX_SOURCE_STATE_PLAYING || state == SFX_SOURCE_STATE_PAUSED));
 
     if (sfx_signal_kill)
         sfx_last_error = SFX_NO_ERROR;

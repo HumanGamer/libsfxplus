@@ -112,7 +112,7 @@ SFXPLUSEXP const char* SFXPLUSCALL sfx_error_string(int error = -1);
 /*
  * Creates an audio source with the specified parameters
  */
-SFXPLUSEXP SFX_SOURCE SFXPLUSCALL sfx_source_create(float pitch = 1.0f, float gain = 1.0f, bool looping = false);
+SFXPLUSEXP SFX_SOURCE SFXPLUSCALL sfx_source_create(bool looping = false, float pitch = 1.0f, float gain = 1.0f);
 
 /*
  * Destroys an audio source
