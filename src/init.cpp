@@ -98,7 +98,7 @@ void SFXPLUSCALL sfx_shutdown()
     if (sfx_source_loop_thread.joinable())
         sfx_source_loop_thread.join();
 
-    sfx_source_close_streams_internal();
+    sfx_stream_close_streams_internal();
 
     alc_device = alcGetContextsDevice(alc_context);
     alcMakeContextCurrent(nullptr);

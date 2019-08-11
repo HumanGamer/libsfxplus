@@ -37,7 +37,7 @@ int main(int argc, const char** argv)
     ERROR_CHECK("Error when creating source");
 
     std::cout << "Opening audio stream..." << std::endl;
-    SFX_STREAM stream = sfx_source_open_stream(source, inputFile);
+    SFX_STREAM stream = sfx_stream_open(source, inputFile);
     ERROR_CHECK("Error when opening audio stream");
 
     std::cout << "Playing Audio..." << std::endl;
@@ -49,7 +49,7 @@ int main(int argc, const char** argv)
     ERROR_CHECK("Error when waiting for playback to finish");
 
     std::cout << "Closing stream..." << std::endl;
-    sfx_source_close_stream(stream);
+    sfx_stream_close(stream);
     ERROR_CHECK("Error when closing stream");
 
     std::cout << "Unloading source" << std::endl;

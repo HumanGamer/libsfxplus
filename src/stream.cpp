@@ -234,7 +234,7 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
     delete[](buffers);
 }
 
-SFX_STREAM SFXPLUSCALL sfx_source_open_stream(SFX_SOURCE source, const char* path, int bufferCount)
+SFX_STREAM SFXPLUSCALL sfx_stream_open(SFX_SOURCE source, const char* path, int bufferCount)
 {
     sfx_last_error = SFX_NO_ERROR;
 
@@ -263,17 +263,17 @@ SFX_STREAM SFXPLUSCALL sfx_source_open_stream(SFX_SOURCE source, const char* pat
 
     SFX_STREAM_THREADS threads;
     threads.io = std::make_shared<std::thread>(sfx_run_stream_io_internal, stream, file);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
     threads.playback = std::make_shared<std::thread>(sfx_run_stream_openal_internal, stream, source, bufferCount, file);
 
     sfx_stream_thread[stream] = threads;
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
     return stream;
 }
 
-void SFXPLUSCALL sfx_source_close_stream(SFX_STREAM stream)
+void SFXPLUSCALL sfx_stream_close(SFX_STREAM stream)
 {
     sfx_last_error = SFX_NO_ERROR;
 
@@ -304,7 +304,7 @@ void SFXPLUSCALL sfx_source_close_stream(SFX_STREAM stream)
     }
 }
 
-void sfx_source_close_streams_internal()
+void sfx_stream_close_streams_internal()
 {
     for (const auto& stream : sfx_stream_ids)
     {

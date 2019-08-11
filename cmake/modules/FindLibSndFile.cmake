@@ -12,9 +12,11 @@ if(PKG_CONFIG_FOUND)
 endif(PKG_CONFIG_FOUND)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(_LIBSNDFILE_PATH "C:/Program Files/Mega-Nerd/libsndfile")
+  set(_LIBSNDFILE_PATH1 "C:/Libs/Native/libsndfile/lib/x64")
+  set(_LIBSNDFILE_PATH2 "C:/Program Files/Mega-Nerd/libsndfile")
 else()
-  set(_LIBSNDFILE_PATH "C:/Program Files (x86)/Mega-Nerd/libsndfile")
+  set(_LIBSNDFILE_PATH1 "C:/Libs/Native/libsndfile/lib/x86")
+  set(_LIBSNDFILE_PATH2 "C:/Program Files (x86)/Mega-Nerd/libsndfile")
 endif()
 
 # Include dir
@@ -22,15 +24,17 @@ find_path(LIBSNDFILE_INCLUDE_DIR
 	NAMES sndfile.h
 	PATHS
     ${LIBSNDFILE_PKGCONF_INCLUDE_DIRS}
-    ${_LIBSNDFILE_PATH}/include
+    "C:/Libs/Native/libsndfile/include"
+    ${_LIBSNDFILE_PATH2}/include
 )
 
 # Library
 find_library(LIBSNDFILE_LIBRARY
-	NAMES sndfile libsndfile-1
+	NAMES sndfile libsndfile libsndfile-1
 	PATHS
     ${LIBSNDFILE_PKGCONF_LIBRARY_DIRS}
-    ${_LIBSNDFILE_PATH}/lib
+    ${_LIBSNDFILE_PATH1}
+    ${_LIBSNDFILE_PATH2}/lib
 )
 
 find_package(PackageHandleStandardArgs)

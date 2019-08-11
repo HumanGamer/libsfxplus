@@ -19,7 +19,7 @@ extern int sfx_last_error;
 extern bool sfx_checkerror_internal();
 extern void sfx_setlasterror_internal(int error, bool alc = false);
 
-extern void sfx_source_close_streams_internal();
+extern void sfx_stream_close_streams_internal();
 
 extern void sfx_source_run_loop_thread_internal();
 
