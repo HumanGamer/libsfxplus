@@ -313,8 +313,6 @@ void SFXPLUSCALL sfx_source_wait(SFX_SOURCE source)
 {
     sfx_last_error = SFX_NO_ERROR;
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
     int state = 0;
 
     do
@@ -330,6 +328,4 @@ void SFXPLUSCALL sfx_source_wait(SFX_SOURCE source)
 
     if (sfx_signal_kill)
         sfx_last_error = SFX_NO_ERROR;
-    else
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }

@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <al.h>
 
-std::mutex sfx_stream_io_mutex, sfx_stream_playback_mutex;
+std::mutex sfx_stream_main_mutex, sfx_stream_io_mutex, sfx_stream_playback_mutex;
 
 std::vector<SFX_STREAM> sfx_stream_ids;
 
@@ -24,6 +24,52 @@ std::map<SFX_STREAM, SFX_STREAM_THREADS> sfx_stream_thread;
 std::map<SFX_STREAM, bool> sfx_stream_running;
 std::map<SFX_STREAM, std::vector<unsigned short>> sfx_stream_data;
 std::map<SFX_STREAM, size_t> sfx_stream_current;
+std::map<SFX_STREAM, bool> sfx_stream_io_started;
+std::map<SFX_STREAM, bool> sfx_stream_openal_started;
+
+bool sfx_stream_check_io_started(SFX_STREAM stream)
+{
+    std::lock(sfx_stream_main_mutex, sfx_stream_io_mutex);
+
+    bool result = sfx_stream_io_started[stream];
+
+    sfx_stream_main_mutex.unlock();
+    sfx_stream_io_mutex.unlock();
+
+    return result;
+}
+
+void sfx_stream_set_io_started(SFX_STREAM stream, bool started)
+{
+    std::lock(sfx_stream_io_mutex, sfx_stream_main_mutex);
+
+    sfx_stream_io_started[stream] = started;
+
+    sfx_stream_io_mutex.unlock();
+    sfx_stream_main_mutex.unlock();
+}
+
+bool sfx_stream_check_openal_started(SFX_STREAM stream)
+{
+    std::lock(sfx_stream_main_mutex, sfx_stream_playback_mutex);
+
+    bool result = sfx_stream_openal_started[stream];
+
+    sfx_stream_main_mutex.unlock();
+    sfx_stream_playback_mutex.unlock();
+
+    return result;
+}
+
+void sfx_stream_set_openal_started(SFX_STREAM stream, bool started)
+{
+    std::lock(sfx_stream_playback_mutex, sfx_stream_main_mutex);
+
+    sfx_stream_openal_started[stream] = started;
+
+    sfx_stream_playback_mutex.unlock();
+    sfx_stream_main_mutex.unlock();
+}
 
 void sfx_add_data_internal(SFX_STREAM stream, unsigned short* buffer, unsigned int bufferSize)
 {
@@ -64,9 +110,20 @@ void sfx_run_stream_io_internal(SFX_STREAM stream, SFX_FILE* snd)
 
     unsigned short read_buf[2048];
 
+    long long loops = 0;
+
+    // The amount of loops before starting the playback thread.
+    // This may need to be adjusted. Needs more testing...
+    long long loopsToStart = 3;
+
     size_t read_size = 0;
     while (sfx_stream_running[stream] && (read_size = sfx_io_read(snd, read_buf, 2048)) != 0)
+    {
         sfx_add_data_internal(stream, read_buf, read_size);
+
+        if (++loops >= loopsToStart || read_size < 2047)
+            sfx_stream_set_io_started(stream, true);
+    }
 }
 
 void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bufCount, SFX_FILE* file)
@@ -77,6 +134,9 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
     if (!sfx_checkerror_internal())
     {
         sfx_last_error = SFX_FAIL_CREATE_BUFFER;
+
+        // Prevent getting stuck in an infinite loop on the main thread!
+        sfx_stream_set_openal_started(stream, true);
         return;
     }
 
@@ -92,6 +152,9 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
         if (!sfx_checkerror_internal())
         {
             sfx_last_error = SFX_FAIL_FILL_BUFFER;
+
+            // Prevent getting stuck in an infinite loop on the main thread!
+            sfx_stream_set_openal_started(stream, true);
             return;
         }
     }
@@ -100,8 +163,13 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
     if (!sfx_checkerror_internal())
     {
         sfx_last_error = SFX_FAIL_QUEUE_BUFFER;
+
+        // Prevent getting stuck in an infinite loop on the main thread!
+        sfx_stream_set_openal_started(stream, true);
         return;
     }
+
+    sfx_stream_set_openal_started(stream, true);
 
     while (true)
     {
@@ -253,6 +321,8 @@ SFX_STREAM SFXPLUSCALL sfx_stream_open(SFX_SOURCE source, const char* path, int 
 
     sfx_stream_source[stream] = source;
     sfx_stream_running[stream] = true;
+    sfx_stream_io_started[stream] = false;
+    sfx_stream_openal_started[stream] = false;
 
     SFX_FILE* file = sfx_io_open(path);
     if (file == nullptr)
@@ -263,12 +333,24 @@ SFX_STREAM SFXPLUSCALL sfx_stream_open(SFX_SOURCE source, const char* path, int 
 
     SFX_STREAM_THREADS threads;
     threads.io = std::make_shared<std::thread>(sfx_run_stream_io_internal, stream, file);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+    // Wait for there to be enough data before continuing...
+    while (true)
+    {
+        if (sfx_stream_check_io_started(stream))
+            break;
+    }
+
     threads.playback = std::make_shared<std::thread>(sfx_run_stream_openal_internal, stream, source, bufferCount, file);
 
     sfx_stream_thread[stream] = threads;
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    // Wait for stream to be initialized before continuing...
+    while (true)
+    {
+        if (sfx_stream_check_openal_started(stream))
+            break;
+    }
 
     return stream;
 }
