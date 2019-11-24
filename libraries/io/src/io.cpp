@@ -1,15 +1,6 @@
 #include <sfxplus/sfxplusio.h>
 #include "io.h"
 
-#include <sndfile.h>
-#include <cstring>
-
-struct SFXIO_FILE_HANDLE
-{
-    SNDFILE *file;
-    const char *path;
-};
-
 SFXIO_FILE *sfxio_open(const char *path)
 {
     SF_INFO sfinfo;
