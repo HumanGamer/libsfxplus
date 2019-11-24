@@ -19,6 +19,7 @@ set (Main_SRC
 )
 
 add_executable(playing ${Main_SRC})
+add_dependencies(playing libsfxplus_core)
 target_link_libraries(playing libsfxplus_core)
 if (MSVC)
     set_target_properties(playing PROPERTIES FOLDER "Examples")

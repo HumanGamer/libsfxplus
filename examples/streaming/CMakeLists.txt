@@ -19,6 +19,7 @@ set (Main_SRC
 )
 
 add_executable(streaming ${Main_SRC})
+add_dependencies(streaming libsfxplus_core)
 target_link_libraries(streaming libsfxplus_core)
 if (MSVC)
     set_target_properties(streaming PROPERTIES FOLDER "Examples")

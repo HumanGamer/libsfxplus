@@ -5,30 +5,23 @@ if (MSVC)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
 
-project(libsfxplus_core)
+project(libsfxplus_io)
 
-find_package(OpenAL REQUIRED)
-include_directories(${OPENAL_INCLUDE_DIR})
+find_package(LibSndFile REQUIRED)
+include_directories(${LIBSNDFILE_INCLUDE_DIRS})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} include)
 
 set (Main_SRC
-    src/init.cpp
-    src/source.cpp
-    src/stream.cpp
-    src/listener.cpp
-    src/audiofile.cpp
     src/io.cpp
-    src/error.cpp
 )
 
 set (Main_PRIVATE_HDR
-    include/core.h
     include/io.h
 )
 
 set (Main_PUBLIC_HDR
-    ${CMAKE_SOURCE_DIR}/include/sfxplus/sfxplus.h
+    ${CMAKE_SOURCE_DIR}/include/sfxplus/sfxplusio.h
 )
 
 source_group("Library\\Sources" FILES ${Main_SRC})
@@ -41,16 +34,15 @@ set (Main_ALLSRC
     ${Main_PUBLIC_HDR}
 )
 
-add_library(libsfxplus_core ${LIBRARY_TYPE} ${Main_ALLSRC})
-add_dependencies(libsfxplus_core libsfxplus_io)
-target_link_libraries(libsfxplus_core libsfxplus_io -lpthread ${OPENAL_LIBRARY})
+add_library(libsfxplus_io ${LIBRARY_TYPE} ${Main_ALLSRC})
+target_link_libraries(libsfxplus_io ${LIBSNDFILE_LIBRARIES})
 
-set_target_properties(libsfxplus_core PROPERTIES PREFIX "")
+set_target_properties(libsfxplus_io PROPERTIES PREFIX "")
 if (MSVC)
-    set_target_properties(libsfxplus_core PROPERTIES FOLDER "Library")
+    set_target_properties(libsfxplus_io PROPERTIES FOLDER "Library")
 endif()
 
-install(TARGETS libsfxplus_core
+install(TARGETS libsfxplus_io
         RUNTIME DESTINATION ${BIN_DESTINATION}
         LIBRARY DESTINATION ${LIB_DESTINATION}
         ARCHIVE DESTINATION ${LIB_DESTINATION}
