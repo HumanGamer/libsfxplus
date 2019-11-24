@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sfxplus.h"
+#include <sfxplus/sfxplus.h>
 
 typedef struct ALCdevice_struct ALCdevice;
 typedef struct ALCcontext_struct ALCcontext;

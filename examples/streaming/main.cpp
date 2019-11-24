@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <sfxplus.h>
+#include <sfxplus/sfxplus.h>
 
 #define ERROR_CHECK(msg) \
     if (sfx_error() != SFX_NO_ERROR) \
