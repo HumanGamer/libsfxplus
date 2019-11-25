@@ -173,7 +173,7 @@ SFXPLUSEXP void SFXPLUSCALL sfx_source_stop(SFX_SOURCE source);
 /*
  * Streams an audio file using the specified source
  */
-SFXPLUSEXP SFX_STREAM SFXPLUSCALL sfx_stream_open(SFX_SOURCE source, const char* path, int bufferCount = 3);
+SFXPLUSEXP SFX_STREAM SFXPLUSCALL sfx_stream_open(SFX_SOURCE source, const char* path, int bufferCount = 20);
 
 /*
  * Closes an audio stream
