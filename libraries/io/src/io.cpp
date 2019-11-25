@@ -108,4 +108,5 @@ sfx_size_t sfxio_read(SFXIO_FILE *file, unsigned short *ptr, sfx_size_t items)
             return sf_read_short(file->file->file, (short *)ptr, items);
     }
 
+    return 0;
 }
