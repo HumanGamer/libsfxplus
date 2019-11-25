@@ -117,7 +117,7 @@ void sfx_run_stream_io_internal(SFX_STREAM stream, SFX_FILE* snd)
     long long loopsToStart = 3;
 
     size_t read_size = 0;
-    while (sfx_stream_running[stream] && (read_size = sfx_io_read(snd, read_buf, 2048)) != 0)
+    while (snd != nullptr && sfx_stream_running[stream] && (read_size = sfx_io_read(snd, read_buf, 2048)) != 0)
     {
         sfx_add_data_internal(stream, read_buf, read_size);
 
@@ -137,6 +137,8 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
 
         // Prevent getting stuck in an infinite loop on the main thread!
         sfx_stream_set_openal_started(stream, true);
+        delete[](buffers);
+        sfx_io_close(file);
         return;
     }
 
@@ -155,6 +157,8 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
 
             // Prevent getting stuck in an infinite loop on the main thread!
             sfx_stream_set_openal_started(stream, true);
+            delete[](buffers);
+            sfx_io_close(file);
             return;
         }
     }
@@ -166,6 +170,8 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
 
         // Prevent getting stuck in an infinite loop on the main thread!
         sfx_stream_set_openal_started(stream, true);
+        delete[](buffers);
+        sfx_io_close(file);
         return;
     }
 
@@ -178,6 +184,8 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
         if (!sfx_checkerror_internal())
         {
             sfx_last_error = SFX_FAIL_GET_STATE;
+            delete[](buffers);
+            sfx_io_close(file);
             return;
         }
 
@@ -185,7 +193,11 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
             break;
 
         if (!sfx_stream_running[stream])
+        {
+            delete[](buffers);
+            sfx_io_close(file);
             return;
+        }
     }
 
     unsigned int buf;
@@ -197,6 +209,8 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
         if (!sfx_checkerror_internal())
         {
             sfx_last_error = SFX_FAIL_GET_PROPERTY;
+            delete[](buffers);
+            sfx_io_close(file);
             return;
         }
 
@@ -205,8 +219,12 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
             alSourceUnqueueBuffers(source, 1, &buf);
             if (!sfx_checkerror_internal())
             {
-                sfx_last_error = SFX_FAIL_UNQUEUE_BUFFER;
-                return;
+                //sfx_last_error = SFX_FAIL_UNQUEUE_BUFFER;
+                //delete[](buffers);
+                //sfx_io_close(file);
+                //return;
+                // TODO: Fix this error correctly instead of ignoring it, it's caused by AL_INVALID_VALUE
+                break;
             }
             numProcessed--;
 
@@ -217,6 +235,8 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
                 if (!sfx_checkerror_internal())
                 {
                     sfx_last_error = SFX_FAIL_FILL_BUFFER;
+                    delete[](buffers);
+                    sfx_io_close(file);
                     return;
                 }
 
@@ -224,6 +244,8 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
                 if (!sfx_checkerror_internal())
                 {
                     sfx_last_error = SFX_FAIL_QUEUE_BUFFER;
+                    delete[](buffers);
+                    sfx_io_close(file);
                     return;
                 }
             }
@@ -234,6 +256,7 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
         if (!sfx_checkerror_internal())
         {
             sfx_last_error = SFX_FAIL_GET_STATE;
+            sfx_io_close(file);
             return;
         }
 
@@ -244,14 +267,22 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
             if (!sfx_checkerror_internal())
             {
                 sfx_last_error = SFX_FAIL_GET_PROPERTY;
+                delete[](buffers);
+                sfx_io_close(file);
                 return;
             }
             if (queued == 0)
             {
+                delete[](buffers);
                 if (sfx_source_get_looping_internal(source))
                     sfx_run_stream_openal_internal(stream, source, bufCount, file);
                 else
+                {
                     sfx_stream_running[stream] = false;
+
+                    sfx_io_close(file);
+                }
+
                 return;
             }
 
@@ -259,6 +290,8 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
             if (!sfx_checkerror_internal())
             {
                 sfx_last_error = SFX_FAIL_PLAY_SOURCE;
+                delete[](buffers);
+                sfx_io_close(file);
                 return;
             }
         }
@@ -270,6 +303,7 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
     if (!sfx_checkerror_internal())
     {
         sfx_last_error = SFX_FAIL_STOP_SOURCE;
+        delete[](buffers);
         return;
     }
 
@@ -278,6 +312,7 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
     if (!sfx_checkerror_internal())
     {
         sfx_last_error = SFX_FAIL_GET_PROPERTY;
+        delete[](buffers);
         return;
     }
 
@@ -287,6 +322,7 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
         if (!sfx_checkerror_internal())
         {
             sfx_last_error = SFX_FAIL_UNQUEUE_BUFFER;
+            delete[](buffers);
             return;
         }
         numProcessed--;
@@ -296,6 +332,7 @@ void sfx_run_stream_openal_internal(SFX_STREAM stream, SFX_SOURCE source, int bu
     if (!sfx_checkerror_internal())
     {
         sfx_last_error = SFX_FAIL_DELETE_BUFFER;
+        delete[](buffers);
         return;
     }
 

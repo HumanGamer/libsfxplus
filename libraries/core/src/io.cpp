@@ -32,6 +32,7 @@ void sfx_io_close(SFX_FILE* file)
     sfxio_close(file->file->file);
     delete(file->file);
     delete(file);
+    file = nullptr;
 }
 
 size_t sfx_io_read(SFX_FILE* file, unsigned short* ptr, size_t items)
