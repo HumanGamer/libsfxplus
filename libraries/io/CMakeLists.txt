@@ -10,14 +10,18 @@ project(libsfxplus_io)
 find_package(LibSndFile REQUIRED)
 include_directories(${LIBSNDFILE_INCLUDE_DIRS})
 
+include_directories(${CMAKE_SOURCE_DIR}/deps/minimp3)
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR} include)
 
 set (Main_SRC
     src/io.cpp
+    src/mp3.cpp
 )
 
 set (Main_PRIVATE_HDR
     include/io.h
+    include/mp3.h
 )
 
 set (Main_PUBLIC_HDR

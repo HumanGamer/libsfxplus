@@ -10,6 +10,8 @@
 #include <Windows.h>
 #endif
 
+#include <sfxplus/sfxplusio.h>
+
 bool sfx_initialized = false;
 
 bool sfx_shuttingdown = false;
@@ -49,6 +51,12 @@ bool SFXPLUSCALL sfx_startup()
 #ifdef _WIN32
     SetConsoleCtrlHandler((PHANDLER_ROUTINE)(ctrl_handler), TRUE);
 #endif
+
+    if (!sfxio_startup())
+    {
+        sfx_last_error = SFX_FAIL_IO_INIT;
+        return false;
+    }
 
     alc_device = alcOpenDevice(nullptr);
     if (alc_device == nullptr)
@@ -104,6 +112,8 @@ void SFXPLUSCALL sfx_shutdown()
     alcMakeContextCurrent(nullptr);
     alcDestroyContext(alc_context);
     alcCloseDevice(alc_device);
+
+    sfxio_shutdown();
 }
 
 void sfx_signal_handler_internal(int signum)

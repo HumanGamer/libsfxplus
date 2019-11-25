@@ -20,6 +20,8 @@ const char* SFXPLUSCALL sfx_error_string(int error)
         return "SFX_NO_ERROR";
     case SFX_INTERNAL_ERROR:
         return "SFX_INTERNAL_ERROR";
+    case SFX_FAIL_IO_INIT:
+        return "SFX_FAIL_IO_INIT";
     case SFX_FAIL_OPEN_DEVICE:
         return "SFX_FAIL_OPEN_DEVICE";
     case SFX_FAIL_CREATE_CONTEXT:

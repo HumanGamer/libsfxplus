@@ -60,6 +60,18 @@ extern "C"
     };
 
 /*
+ * Initializes SFX+ IO Library
+ * This must be the first thing called before any other functions in this library.
+ */
+SFXPLUSIOEXP bool sfxio_startup();
+
+/*
+ * Unloads the SFX+ IO Library
+ * This should be called when closing the program
+ */
+SFXPLUSIOEXP void SFXPLUSIOCALL sfxio_shutdown();
+
+/*
  * Opens a sound file at the specified path
  */
 SFXPLUSIOEXP SFXIO_FILE *sfxio_open(const char *path);
