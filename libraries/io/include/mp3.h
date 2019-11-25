@@ -12,6 +12,7 @@ struct MP3File
     int samples;
     size_t allocated;
     size_t read_pos;
+    bool loaded;
 };
 
 extern bool open_mp3(const char *path, MP3File *mp3);
