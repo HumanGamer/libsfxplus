@@ -20,14 +20,6 @@ option(BUILD_EXAMPLES "Build examples" ON)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} include)
 
-if (SHARED_LIBRARY)
-    set(SFXPLUS_SHARED ON)
-    set(LIBRARY_TYPE SHARED)
-    add_definitions(-DSFXPLUS_SHARED_EXPORT)
-else()
-    set(LIBRARY_TYPE STATIC)
-endif()
-
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config/sfxplus_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/sfxplus_config.h @ONLY)
 
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

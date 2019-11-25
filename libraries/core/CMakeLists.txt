@@ -41,6 +41,14 @@ set (Main_ALLSRC
     ${Main_PUBLIC_HDR}
 )
 
+if (SHARED_LIBRARY)
+    set(SFXPLUS_SHARED ON)
+    set(LIBRARY_TYPE SHARED)
+    add_definitions(-DSFXPLUS_SHARED_EXPORT)
+else()
+    set(LIBRARY_TYPE STATIC)
+endif()
+
 add_library(libsfxplus_core ${LIBRARY_TYPE} ${Main_ALLSRC})
 add_dependencies(libsfxplus_core libsfxplus_io)
 target_link_libraries(libsfxplus_core libsfxplus_io -lpthread ${OPENAL_LIBRARY})

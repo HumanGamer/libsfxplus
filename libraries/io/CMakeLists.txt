@@ -38,6 +38,14 @@ set (Main_ALLSRC
     ${Main_PUBLIC_HDR}
 )
 
+if (SHARED_LIBRARY)
+    set(SFXPLUS_SHARED ON)
+    set(LIBRARY_TYPE SHARED)
+    add_definitions(-DSFXPLUSIO_SHARED_EXPORT)
+else()
+    set(LIBRARY_TYPE STATIC)
+endif()
+
 add_library(libsfxplus_io ${LIBRARY_TYPE} ${Main_ALLSRC})
 target_link_libraries(libsfxplus_io ${LIBSNDFILE_LIBRARIES})
 

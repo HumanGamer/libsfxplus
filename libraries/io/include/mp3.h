@@ -1,8 +1,7 @@
 #pragma once
 
-#include <sfxplus/sfxplusio.h>
-
 #include "io.h"
+#include <minimp3_ex.h>
 
 struct MP3File
 {
@@ -12,6 +11,7 @@ struct MP3File
     mp3dec_frame_info_t *frame_info;
     int samples;
     size_t allocated;
+    size_t read_pos;
 };
 
 extern bool open_mp3(const char *path, MP3File *mp3);

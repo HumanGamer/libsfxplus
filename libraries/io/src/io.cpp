@@ -1,4 +1,3 @@
-#include <sfxplus/sfxplusio.h>
 #include "io.h"
 
 bool initialized = false;

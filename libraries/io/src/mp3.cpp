@@ -1,5 +1,17 @@
 #include "mp3.h"
 
+#include <memory>
+#define MINIMP3_IMPLEMENTATION
+#define MINIMP3_NO_SIMD
+#include <minimp3.h>
+#include <minimp3_ex.h>
+
+#include <cassert>
+
+#ifndef min
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
+
 bool open_mp3(const char *path, MP3File *mp3)
 {
     mp3dec_t *dec = new mp3dec_t();
@@ -21,8 +33,7 @@ bool open_mp3(const char *path, MP3File *mp3)
     mp3->file_info = info;
     mp3->map_info = map_info;
     mp3->frame_info = frame_info;
-    //memset(info, 0, sizeof(*info));
-    memset(&frame_info, 0, sizeof(frame_info));
+
     /* skip id3 */
     mp3dec_skip_id3(&map_info->buffer, &map_info->size);
     if (!map_info->size)
@@ -72,6 +83,8 @@ bool open_mp3(const char *path, MP3File *mp3)
     info->hz = frame_info->hz;
     info->layer = frame_info->layer;
 
+    mp3->read_pos = 0;
+
     return true;
 }
 
@@ -89,7 +102,8 @@ sfx_size_t read_mp3(MP3File *mp3, unsigned short *ptr, sfx_size_t items)
     size_t avg_bitrate_kbps = mp3->frame_info->bitrate_kbps;
     size_t frames = 1;
 
-    size_t bytes_to_read = items * 2;
+    size_t bytes_to_read = items * sizeof(unsigned short);
+    size_t bytes_read = 0;
 
     /* decode rest frames */
     int frame_bytes;
@@ -117,13 +131,25 @@ sfx_size_t read_mp3(MP3File *mp3, unsigned short *ptr, sfx_size_t items)
             mp3->file_info->samples += mp3->samples * mp3->frame_info->channels;
             avg_bitrate_kbps += mp3->frame_info->bitrate_kbps;
             frames++;
-            //if (progress_cb)
-            //    progress_cb(user_data, orig_buf_size, orig_buf_size - buf_size, &frame_info);
         }
-    } while (frame_bytes);
+
+        bytes_read += mp3->samples * mp3->frame_info->channels * sizeof(int16_t);
+    } while (frame_bytes && bytes_read < bytes_to_read);
+
     /* reallocate to normal buffer size */
-    if (mp3->allocated != mp3->file_info->samples * sizeof(mp3d_sample_t))
+    if (frame_bytes == 0 && mp3->allocated != mp3->file_info->samples * sizeof(mp3d_sample_t))
         mp3->file_info->buffer = (mp3d_sample_t *)realloc(mp3->file_info->buffer, mp3->file_info->samples * sizeof(mp3d_sample_t));
     mp3->file_info->avg_bitrate_kbps = avg_bitrate_kbps / frames;
 
+    size_t ret = min(bytes_to_read, bytes_read);
+
+    if (ret == 0)
+        return 0;
+
+    uint8_t* data_read = (uint8_t*)(mp3->file_info->buffer) + mp3->read_pos;
+    memcpy_s((uint8_t *)ptr, bytes_to_read, data_read, ret);
+
+    mp3->read_pos += ret;
+
+    return ret / 2;
 }
