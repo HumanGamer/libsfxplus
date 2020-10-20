@@ -40,9 +40,9 @@
 #endif
 
 #ifdef SFXPLUSIO64
-typedef unsigned __int64 sfx_size_t;
+typedef unsigned long long sfx_size_t;
 #else
-typedef unsigned int     sfx_size_t;
+typedef unsigned int       sfx_size_t;
 #endif
 
 #ifdef __cplusplus

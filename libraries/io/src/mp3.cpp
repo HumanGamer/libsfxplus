@@ -161,7 +161,11 @@ sfx_size_t read_mp3(MP3File *mp3, unsigned short *ptr, sfx_size_t items)
         return 0;
 
     uint8_t* data_read = (uint8_t*)(mp3->file_info->buffer) + mp3->read_pos;
-    memcpy_s((uint8_t *)ptr, bytes_to_read, data_read, ret);
+    #if defined(__STDC_WANT_LIB_EXT1__) || defined(_MSC_VER)
+        memcpy_s((uint8_t *)ptr, bytes_to_read, data_read, ret);
+    #else
+       memcpy((uint8_t *)ptr, data_read, ret);
+    #endif
 
     mp3->read_pos += ret;
 
