@@ -108,12 +108,24 @@ SFXPLUSEXP int SFXPLUSCALL sfx_error();
 /*
  * Gets the specified error (or the last error) as a string.
  */
-SFXPLUSEXP const char* SFXPLUSCALL sfx_error_string(int error = -1);
+SFXPLUSEXP const char* SFXPLUSCALL sfx_error_string(
+#ifdef __cplusplus
+                                                    int error = -1
+#else
+                                                    int error
+#endif
+                                                    );
 
 /*
  * Creates an audio source with the specified parameters
  */
-SFXPLUSEXP SFX_SOURCE SFXPLUSCALL sfx_source_create(bool looping = false, float pitch = 1.0f, float gain = 1.0f);
+SFXPLUSEXP SFX_SOURCE SFXPLUSCALL sfx_source_create(
+#ifdef __cplusplus
+                                                    bool looping = false, float pitch = 1.0f, float gain = 1.0f
+#else
+                                                    bool looping, float pitch, float gain
+#endif
+                                                    );
 
 /*
  * Destroys an audio source
@@ -173,7 +185,13 @@ SFXPLUSEXP void SFXPLUSCALL sfx_source_stop(SFX_SOURCE source);
 /*
  * Streams an audio file using the specified source
  */
-SFXPLUSEXP SFX_STREAM SFXPLUSCALL sfx_stream_open(SFX_SOURCE source, const char* path, int bufferCount = 20);
+SFXPLUSEXP SFX_STREAM SFXPLUSCALL sfx_stream_open(SFX_SOURCE source, const char* path,
+#ifdef __cplusplus
+                                                                                       int bufferCount = 20
+#else
+                                                                                       int bufferCount
+#endif
+                                                 );
 
 /*
  * Closes an audio stream
