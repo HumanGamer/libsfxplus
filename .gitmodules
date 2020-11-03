@@ -1,0 +1,3 @@
+[submodule "deps/minimp3"]
+	path = deps/minimp3
+	url = https://github.com/HumanGamer/minimp3
